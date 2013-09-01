@@ -15,7 +15,7 @@ d3.slider = function module() {
       animate = true,
       orientation = "horizontal",
       axis = false,
-      margin = 100,
+      margin = 50,
       value,
       scale; 
 

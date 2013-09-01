@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>D3.js Slider Examples</title>
+  <link rel="stylesheet" href="d3.slider.css" />  
+  <style>
+
+    body {
+      font-family: Verdana,Arial,sans-serif;
+    }
+
+    h2 {
+    	font-size: 1.2em;
+    	margin: 60px 0 5px 0;
+    }
+
+	.wrapper div {
+		margin: 35px 0;
+	}
+
+    .wrapper {
+      width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #slider7 {
+    	height: 250px;
+    }
+
+
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+  	<h1>D3.js Slider Examples</h1>
+
+  	<p><a href="http://github.com/turban/d3.slider">http://github.com/turban/d3.slider</a></p>
+
+    <h2>Default slider</h2>
+    <code>d3.slider()</code>
+    <div id="slider1"></div>
+
+    <h2>Slider with start value</h2>
+    <code>d3.slider().value(25)</code>
+    <div id="slider2"></div>
+
+    <h2>Slider with slide event: <span id="slider3text">0</span></h2>
+    <code>d3.slider().on("slide", function(evt, value) {<br>
+    &nbsp;&nbsp;d3.select('#slider3text').text(value);<br>
+    })</code>
+    <div id="slider3"></div>
+
+    <h2>Slider with default axis</h2>
+    <code>d3.slider().axis(true)</code>
+    <div id="slider4"></div>
+
+    <h2>Slider with custom axis</h2>
+    <code>d3.slider().axis( d3.svg.axis().orient("top").ticks(6) )</code>
+    <div id="slider5"></div>
+
+    <h2>Slider with min, max and step values</h2>
+    <code>d3.slider().axis(true).min(2000).max(2100).step(5)</code>
+    <div id="slider6"></div>
+
+    <h2>Vertical slider</h2>
+    <code>d3.slider().value(50).orientation("vertical")</code>
+    <div id="slider7"></div>
+
+  </div>
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="d3.slider.js"></script>
+  <script>
+
+    d3.select('#slider1').call(d3.slider());
+
+    d3.select('#slider2').call(d3.slider().value(25));
+
+    d3.select('#slider3').call(d3.slider().on("slide", function(evt, value) {
+      d3.select('#slider3text').text(value);
+    }));
+
+    d3.select('#slider4').call(d3.slider().axis(true));
+
+    var axis = d3.svg.axis().orient("top").ticks(4);
+    d3.select('#slider5').call(d3.slider().axis(axis));
+
+    d3.select('#slider6').call(d3.slider().axis(true).min(2000).max(2100).step(5));
+
+    d3.select('#slider7').call(d3.slider().value(50).orientation("vertical"));
+
+  </script>
+ 
+</body>
+</html>
