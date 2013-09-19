@@ -17,6 +17,7 @@ d3.slider = function module() {
       axis = false,
       margin = 50,
       value,
+      active = 1,
       scale; 
 
   // Private variables
@@ -43,25 +44,67 @@ d3.slider = function module() {
       var drag = d3.behavior.drag();
 
       // Slider handle
-      var handle = div.append("a")
+      //if range slider, create two
+      var handle1, handle2 = null;
+      if ( value.length == 2 ) {
+        handle1 = div.append("a")
           .classed("d3-slider-handle", true)
+          .attr("xlink:href", "#")
+          .attr('id', "handle-one")
+          .on("click", stopPropagation)
+          .call(drag);
+        handle2 = div.append("a")
+          .classed("d3-slider-handle", true)
+          .attr('id', "handle-two")
           .attr("xlink:href", "#")
           .on("click", stopPropagation)
           .call(drag);
-
+      } else {
+        handle1 = div.append("a")
+          .classed("d3-slider-handle", true)
+          .attr("xlink:href", "#")
+          .attr('id', "handle-one")
+          .on("click", stopPropagation)
+          .call(drag);
+      }
+      
       // Horizontal slider
       if (orientation === "horizontal") {
 
         div.on("click", onClickHorizontal);
-        drag.on("drag", onDragHorizontal);
-        handle.style("left", formatPercent(scale(value)));
+        
+        if ( value.length == 2 ) {
+          
+          handle1.style("left", formatPercent(scale(value[ 0 ])));
+          drag.on("drag", onDragHorizontal);
+
+          handle2.style("left", formatPercent(scale(value[ 1 ])));
+          drag.on("drag", onDragHorizontal);
+
+        } else {
+          handle1.style("left", formatPercent(scale(value)));
+          drag.on("drag", onDragHorizontal);
+        }  
+        
         sliderLength = parseInt(div.style("width"), 10);
 
       } else { // Vertical
 
         div.on("click", onClickVertical);
         drag.on("drag", onDragVertical);
-        handle.style("bottom", formatPercent(scale(value)));
+        if ( value.length == 2 ) {
+          
+          handle1.style("bottom", formatPercent(scale(value[ 0 ])));
+          drag.on("drag", onDragVertical);
+
+          handle2.style("bottom", formatPercent(scale(value[ 1 ])));
+          drag.on("drag", onDragVertical);
+
+        } else {
+          handle1.style("bottom", formatPercent(scale(value)));
+          drag.on("drag", onDragVertical);
+        } 
+        
         sliderLength = parseInt(div.style("height"), 10);
 
       }
@@ -144,14 +187,29 @@ d3.slider = function module() {
               newPos = formatPercent(scale(stepValue(newValue))),
               position = (orientation === "horizontal") ? "left" : "bottom";
 
-          dispatch.slide(d3.event.sourceEvent || d3.event, value = newValue);
-
-          if (animate) {
-            handle.transition()
-                .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
-                .duration((typeof animate === "number") ? animate : 250);
+          if ( value.length === 2) {
+            value[ active - 1 ] = newValue;
+            dispatch.slide(d3.event, value );
           } else {
-            handle.style(position, newPos);          
+            dispatch.slide(d3.event.sourceEvent || d3.event, value = newValue);
+          }
+
+          if ( active === 1 ) {
+            if (animate) {
+              handle1.transition()
+                  .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
+                  .duration((typeof animate === "number") ? animate : 250);
+            } else {
+              handle1.style(position, newPos);           
+            }
+          } else {
+            if (animate) {
+              handle2.transition()
+                  .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
+                  .duration((typeof animate === "number") ? animate : 250);
+            } else {
+              handle2.style(position, newPos);           
+            }
           }
         }
 
@@ -174,18 +232,28 @@ d3.slider = function module() {
 
 
       function onClickHorizontal() {
-        moveHandle(d3.event.offsetX || d3.event.layerX);
+        //moveHandle(d3.event.offsetX || d3.event.layerX);
       }
 
       function onClickVertical() {
-        moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
+        //moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
       }
 
       function onDragHorizontal() {
+        if ( d3.event.sourceEvent.target.id === "handle-one") {
+          active = 1;
+        } else if ( d3.event.sourceEvent.target.id == "handle-two" ) {
+          active = 2;
+        }
         moveHandle(Math.max(0, Math.min(sliderLength, d3.event.x)));
       }
 
       function onDragVertical() {
+        if ( d3.event.sourceEvent.target.id === "handle-one") {
+          active = 1;
+        } else if ( d3.event.sourceEvent.target.id == "handle-two" ) {
+          active = 2;
+        }
         moveHandle(sliderLength - Math.max(0, Math.min(sliderLength, d3.event.y)));
       }      
 
