@@ -40,12 +40,13 @@ d3.slider = function module() {
 
       // DIV container
       var div = d3.select(this).classed("d3-slider d3-slider-" + orientation, true);
-
+      
       var drag = d3.behavior.drag();
 
       // Slider handle
       //if range slider, create two
-      var handle1, handle2 = null;
+      var handle1, handle2 = null, divRange;
+
       if ( value.length == 2 ) {
         handle1 = div.append("a")
           .classed("d3-slider-handle", true)
@@ -74,11 +75,15 @@ d3.slider = function module() {
         div.on("click", onClickHorizontal);
         
         if ( value.length == 2 ) {
-          
+          divRange = d3.select(this).append('div').classed("d3-slider-range", true);
+
           handle1.style("left", formatPercent(scale(value[ 0 ])));
+          divRange.style("left", formatPercent(scale(value[ 0 ])));
           drag.on("drag", onDragHorizontal);
 
+          var width = 100 - parseFloat(formatPercent(scale(value[ 1 ])));
           handle2.style("left", formatPercent(scale(value[ 1 ])));
+          divRange.style("right", width+"%");
           drag.on("drag", onDragHorizontal);
 
         } else {
@@ -196,6 +201,7 @@ d3.slider = function module() {
 
           if ( value[ 0 ] >= value[ 1 ] ) return;
           if ( active === 1 ) {
+            divRange.style("left", newPos+"%");
             if (animate) {
               handle1.transition()
                   .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
@@ -204,6 +210,8 @@ d3.slider = function module() {
               handle1.style(position, newPos);           
             }
           } else {
+            var width = 100 - parseFloat(newPos);
+            divRange.style("right", width+"%");
             if (animate) {
               handle2.transition()
                   .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
