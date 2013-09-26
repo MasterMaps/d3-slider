@@ -194,6 +194,7 @@ d3.slider = function module() {
             dispatch.slide(d3.event.sourceEvent || d3.event, value = newValue);
           }
 
+          if ( value[ 0 ] >= value[ 1 ] ) return;
           if ( active === 1 ) {
             if (animate) {
               handle1.transition()
