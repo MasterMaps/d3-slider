@@ -17,6 +17,7 @@ d3.slider = function module() {
       axis = false,
       margin = 50,
       value,
+      div,
       scale; 
 
   // Private variables
@@ -38,7 +39,7 @@ d3.slider = function module() {
       value = value || scale.domain()[0]; 
 
       // DIV container
-      var div = d3.select(this).classed("d3-slider d3-slider-" + orientation, true);
+      div = d3.select(this).classed("d3-slider d3-slider-" + orientation, true);
 
       var drag = d3.behavior.drag();
 
@@ -135,9 +136,13 @@ d3.slider = function module() {
 
 
       // Move slider handle on click/drag
-      function moveHandle(pos) {
-
-        var newValue = stepValue(scale.invert(pos / sliderLength));
+      function moveHandle(pos, val) {
+        var newValue;
+        
+        if(typeof val != "undefined")
+            newValue = val;
+        else
+            newValue = stepValue(scale.invert(pos / sliderLength));
 
         if (value !== newValue) {
           var oldPos = formatPercent(scale(stepValue(value))),
@@ -173,12 +178,12 @@ d3.slider = function module() {
       }
 
 
-      function onClickHorizontal() {
-        moveHandle(d3.event.offsetX || d3.event.layerX);
+      function onClickHorizontal(val) {
+        moveHandle(d3.event.offsetX || d3.event.layerX, val);
       }
 
-      function onClickVertical() {
-        moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
+      function onClickVertical(val) {
+        moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY, val);
       }
 
       function onDragHorizontal() {
@@ -250,7 +255,15 @@ d3.slider = function module() {
     if (!arguments.length) return scale;
     scale = _;
     return slider;
-  }  
+  } 
+  
+  slider.slide_to = function(newValue) {
+	  if(newValue > max)
+		  newValue = max;
+	  else if(newValue < min)
+		  newValue = min;
+	  div.on("click")(newValue);
+  }   
 
   d3.rebind(slider, dispatch, "on");
 

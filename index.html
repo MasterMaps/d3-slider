@@ -42,6 +42,13 @@
     <h2>Default slider</h2>
     <code>d3.slider()</code>
     <div id="slider1"></div>
+    
+    <h2>Slider controlled from an external <span id="slider-button"><input type='button' value='button'/></span></h2></h2>
+    <code>var slider = d3.slider().axis(true);<br>
+    var pos = 0;<br>
+    d3.select('#slider-button').on('click', function() { slider.slide_to(++pos); });
+    </code>
+    <div id="slider_b"></div>    
 
     <h2>Slider with start value</h2>
     <code>d3.slider().value(25)</code>
@@ -76,6 +83,11 @@
   <script>
 
     d3.select('#slider1').call(d3.slider());
+    
+    var slider = d3.slider().axis(true);
+    var pos = 0;
+    d3.select('#slider-button').on('click', function() { slider.slide_to(++pos); });
+    d3.select('#slider_b').call(slider);
 
     d3.select('#slider2').call(d3.slider().value(25));
 
