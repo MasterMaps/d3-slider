@@ -29,6 +29,10 @@
       height: 250px;
     }
 
+    #slider9 {
+      height: 250px;
+    }
+
 
   </style>
 </head>
@@ -76,6 +80,10 @@
     <code>d3.slider().value(50).orientation("vertical")</code>
     <div id="slider8"></div>
 
+    <h2>Vertical range slider</h2>
+    <code>d3.slider().value([10, 45 ]).orientation("vertical")</code>
+    <div id="slider9"></div>
+
   </div>
 
   <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -103,6 +111,8 @@
     d3.select('#slider7').call(d3.slider().axis(true).min(2000).max(2100).step(5));
 
     d3.select('#slider8').call(d3.slider().value(50).orientation("vertical"));
+
+    d3.select('#slider9').call(d3.slider().value( [10, 30] ).orientation("vertical"));
 
   </script>
  

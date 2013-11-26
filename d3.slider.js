@@ -11,7 +11,7 @@ d3.slider = function module() {
   // Public variables width default settings
   var min = 0,
       max = 100,
-      step = 1, 
+      step = 0.01, 
       animate = true,
       orientation = "horizontal",
       axis = false,
@@ -98,11 +98,15 @@ d3.slider = function module() {
         div.on("click", onClickVertical);
         drag.on("drag", onDragVertical);
         if ( value.length == 2 ) {
-          
+          divRange = d3.select(this).append('div').classed("d3-slider-range-vertical", true);
+
           handle1.style("bottom", formatPercent(scale(value[ 0 ])));
+          divRange.style("height", parseFloat(formatPercent(scale(value[ 1 ]))) - parseFloat(formatPercent(scale(value[ 0 ]))) + "%");
           drag.on("drag", onDragVertical);
 
+          var top = 100 - parseFloat(formatPercent(scale(value[ 1 ]))) - 10;
           handle2.style("bottom", formatPercent(scale(value[ 1 ])));
+          divRange.style("top", top+"%");
           drag.on("drag", onDragVertical);
 
         } else {
@@ -201,7 +205,10 @@ d3.slider = function module() {
 
           if ( value[ 0 ] >= value[ 1 ] ) return;
           if ( active === 1 ) {
-            divRange.style("left", newPos+"%");
+            
+            var height = parseFloat(formatPercent(scale(value[ 1 ]))) - parseFloat( newPos );
+            (position === "left") ? divRange.style("left", newPos+"%") : divRange.style( { "height" : height + "%" });
+
             if (animate) {
               handle1.transition()
                   .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
@@ -210,8 +217,13 @@ d3.slider = function module() {
               handle1.style(position, newPos);           
             }
           } else {
+            
             var width = 100 - parseFloat(newPos);
-            divRange.style("right", width+"%");
+            var top = 100 - parseFloat(newPos) - 10;
+            var height = parseFloat( newPos ) - parseFloat(formatPercent(scale(value[ 0 ])));
+
+            (position === "left") ? divRange.style("right", width+"%") : divRange.style( { "top": top+"%", "height" : height + "%" });
+            
             if (animate) {
               handle2.transition()
                   .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
