@@ -10,6 +10,24 @@
     height: .8em;
 }  
 
+.d3-slider-range {
+  background:#2980b9;
+  left:0px;
+  right:0px;
+  height: 0.8em;
+  position: absolute;
+  top: -35px;
+}
+
+.d3-slider-range-vertical {
+  background:#2980b9;
+  left:0px;
+  right:0px;
+  height: 100%;
+  position: absolute;
+  top:0;
+}
+
 .d3-slider-vertical {
     width: .8em;
     height: 100px;

@@ -25,7 +25,11 @@
       margin: 35px 0;
     }
 
-    #slider7 {
+    #slider8 {
+      height: 250px;
+    }
+
+    #slider9 {
       height: 250px;
     }
 
@@ -43,31 +47,42 @@
     <code>d3.slider()</code>
     <div id="slider1"></div>
 
-    <h2>Slider with start value</h2>
-    <code>d3.slider().value(25)</code>
+    <h2>Range Slider</h2>
+    <code>d3.slider().value([10, 25 ])</code>
     <div id="slider2"></div>
 
-    <h2>Slider with slide event: <span id="slider3text">0</span></h2>
-    <code>d3.slider().on("slide", function(evt, value) {<br>
-    &nbsp;&nbsp;d3.select('#slider3text').text(value);<br>
+    <h2>Range Slider with event, values: <span id="slider3textmin">10</span>, <span id="slider3textmax">25</span></h2>
+    <code>d3.select('#slider3').call(d3.slider().axis(true).value( [ 10, 25 ] ).on("slide", function(evt, value) {<br>
+    &nbsp;&nbsp;d3.select('#slider3textmin').text(value[ 0 ]);<br />
+    &nbsp;&nbsp;d3.select('#slider3textmax').text(value[ 1 ]);<br>
     })</code>
     <div id="slider3"></div>
 
+    <h2>Slider with slide event: <span id="slider4text">0</span></h2>
+    <code>d3.slider().on("slide", function(evt, value) {<br>
+    &nbsp;&nbsp;d3.select('#slider3text').text(value);<br>
+    })</code>
+    <div id="slider4"></div>
+
     <h2>Slider with default axis</h2>
     <code>d3.slider().axis(true)</code>
-    <div id="slider4"></div>
+    <div id="slider5"></div>
 
     <h2>Slider with custom axis</h2>
     <code>d3.slider().axis( d3.svg.axis().orient("top").ticks(6) )</code>
-    <div id="slider5"></div>
+    <div id="slider6"></div>
 
     <h2>Slider with min, max and step values</h2>
     <code>d3.slider().axis(true).min(2000).max(2100).step(5)</code>
-    <div id="slider6"></div>
+    <div id="slider7"></div>
 
     <h2>Vertical slider</h2>
     <code>d3.slider().value(50).orientation("vertical")</code>
-    <div id="slider7"></div>
+    <div id="slider8"></div>
+
+    <h2>Vertical range slider</h2>
+    <code>d3.slider().value([10, 45 ]).orientation("vertical")</code>
+    <div id="slider9"></div>
 
   </div>
 
@@ -77,20 +92,27 @@
 
     d3.select('#slider1').call(d3.slider());
 
-    d3.select('#slider2').call(d3.slider().value(25));
+    d3.select('#slider2').call(d3.slider().value( [ 10, 25 ] ));
 
-    d3.select('#slider3').call(d3.slider().on("slide", function(evt, value) {
-      d3.select('#slider3text').text(value);
+    d3.select('#slider3').call(d3.slider().axis(true).value( [ 10, 25 ] ).on("slide", function(evt, value) {
+      d3.select('#slider3textmin').text(value[ 0 ]);
+      d3.select('#slider3textmax').text(value[ 1 ]);
     }));
 
-    d3.select('#slider4').call(d3.slider().axis(true));
+    d3.select('#slider4').call(d3.slider().on("slide", function(evt, value) {
+      d3.select('#slider4text').text(value);
+    }));
+
+    d3.select('#slider5').call(d3.slider().axis(true));
 
     var axis = d3.svg.axis().orient("top").ticks(4);
-    d3.select('#slider5').call(d3.slider().axis(axis));
+    d3.select('#slider6').call(d3.slider().axis(axis));
 
-    d3.select('#slider6').call(d3.slider().axis(true).min(2000).max(2100).step(5));
+    d3.select('#slider7').call(d3.slider().axis(true).min(2000).max(2100).step(5));
 
-    d3.select('#slider7').call(d3.slider().value(50).orientation("vertical"));
+    d3.select('#slider8').call(d3.slider().value(50).orientation("vertical"));
+
+    d3.select('#slider9').call(d3.slider().value( [10, 30] ).orientation("vertical"));
 
   </script>
  
