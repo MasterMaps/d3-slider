@@ -207,7 +207,9 @@ d3.slider = function module() {
           if ( active === 1 ) {
             
             var height = parseFloat(formatPercent(scale(value[ 1 ]))) - parseFloat( newPos );
-            (position === "left") ? divRange.style("left", newPos) : divRange.style( { "height" : height + "%" });
+            if (value.length === 2) {
+              (position === "left") ? divRange.style("left", newPos) : divRange.style( { "height" : height + "%" });
+            }
 
             if (animate) {
               handle1.transition()
