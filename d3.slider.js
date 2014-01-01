@@ -255,11 +255,15 @@ d3.slider = function module() {
 
 
       function onClickHorizontal() {
-        //moveHandle(d3.event.offsetX || d3.event.layerX);
+        if (!value.length) {
+          moveHandle(d3.event.offsetX || d3.event.layerX);
+        }
       }
 
       function onClickVertical() {
-        //moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
+        if (!value.length) {
+          moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
+        }
       }
 
       function onDragHorizontal() {
