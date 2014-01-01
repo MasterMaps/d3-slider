@@ -101,10 +101,10 @@ d3.slider = function module() {
           divRange = d3.select(this).append('div').classed("d3-slider-range-vertical", true);
 
           handle1.style("bottom", formatPercent(scale(value[ 0 ])));
-          divRange.style("height", parseFloat(formatPercent(scale(value[ 1 ]))) - parseFloat(formatPercent(scale(value[ 0 ]))) + "%");
+          divRange.style("bottom", formatPercent(scale(value[ 0 ])));
           drag.on("drag", onDragVertical);
 
-          var top = 100 - parseFloat(formatPercent(scale(value[ 1 ]))) - 10;
+          var top = 100 - parseFloat(formatPercent(scale(value[ 1 ])));
           handle2.style("bottom", formatPercent(scale(value[ 1 ])));
           divRange.style("top", top+"%");
           drag.on("drag", onDragVertical);
@@ -206,9 +206,8 @@ d3.slider = function module() {
           if ( value[ 0 ] >= value[ 1 ] ) return;
           if ( active === 1 ) {
             
-            var height = parseFloat(formatPercent(scale(value[ 1 ]))) - parseFloat( newPos );
             if (value.length === 2) {
-              (position === "left") ? divRange.style("left", newPos) : divRange.style( { "height" : height + "%" });
+              (position === "left") ? divRange.style("left", newPos) : divRange.style("bottom", newPos);
             }
 
             if (animate) {
@@ -221,10 +220,9 @@ d3.slider = function module() {
           } else {
             
             var width = 100 - parseFloat(newPos);
-            var top = 100 - parseFloat(newPos) - 10;
-            var height = parseFloat( newPos ) - parseFloat(formatPercent(scale(value[ 0 ])));
+            var top = 100 - parseFloat(newPos);
 
-            (position === "left") ? divRange.style("right", width+"%") : divRange.style( { "top": top+"%", "height" : height + "%" });
+            (position === "left") ? divRange.style("right", width + "%") : divRange.style("top", top + "%");
             
             if (animate) {
               handle2.transition()
