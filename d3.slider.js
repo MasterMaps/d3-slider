@@ -149,7 +149,7 @@ d3.slider = function module() {
         // Horizontal axis
         if (orientation === "horizontal") {
 
-          svg.style("left", -margin);
+          svg.style("left", -margin + "px");
 
           svg.attr({
             width: sliderLength + margin * 2,
@@ -157,7 +157,7 @@ d3.slider = function module() {
           });
 
           if (axis.orient() === "top") {
-            svg.style("top", -margin);
+            svg.style("top", -margin + "px");
             g.attr("transform", "translate(" + margin + "," + margin + ")");
           } else { // bottom
             g.attr("transform", "translate(" + margin + ",0)");
@@ -165,7 +165,7 @@ d3.slider = function module() {
 
         } else { // Vertical
 
-          svg.style("top", -margin);
+          svg.style("top", -margin + "px");
 
           svg.attr({
             width: margin,
@@ -173,7 +173,7 @@ d3.slider = function module() {
           });
 
           if (axis.orient() === "left") {
-            svg.style("left", -margin);
+            svg.style("left", -margin + "px");
             g.attr("transform", "translate(" + margin + "," + margin + ")");
           } else { // right          
             g.attr("transform", "translate(" + 0 + "," + margin + ")");
