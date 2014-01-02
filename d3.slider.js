@@ -192,10 +192,11 @@ d3.slider = function module() {
       // Move slider handle on click/drag
       function moveHandle(pos) {
 
-        var newValue = stepValue(scale.invert(pos / sliderLength));
+        var newValue = stepValue(scale.invert(pos / containerSize())),
+            currentValue = value.length ? value[active - 1]: value;
 
-        if (value !== newValue) {
-          var oldPos = formatPercent(scale(stepValue(value))),
+        if (currentValue !== newValue) {
+          var oldPos = formatPercent(scale(stepValue(currentValue))),
               newPos = formatPercent(scale(stepValue(newValue))),
               position = (orientation === "horizontal") ? "left" : "bottom";
 
@@ -242,6 +243,10 @@ d3.slider = function module() {
 
       // Calculate nearest step value
       function stepValue(val) {
+
+        if (val === scale.domain()[0] || val === scale.domain()[1]) {
+          return val;
+        }
 
         var valModStep = (val - scale.domain()[0]) % step,
             alignValue = val - valModStep;
