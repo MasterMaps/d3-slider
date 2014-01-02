@@ -22,7 +22,7 @@ d3.slider = function module() {
 
   // Private variables
   var axisScale,
-      dispatch = d3.dispatch("slide"),
+      dispatch = d3.dispatch("slide", "slideend"),
       formatPercent = d3.format(".2%"),
       tickFormat = d3.format(".0"),
       sliderLength;
@@ -42,6 +42,9 @@ d3.slider = function module() {
       var div = d3.select(this).classed("d3-slider d3-slider-" + orientation, true);
       
       var drag = d3.behavior.drag();
+      drag.on('dragend', function () {
+        dispatch.slideend(d3.event, value);
+      })
 
       // Slider handle
       //if range slider, create two
