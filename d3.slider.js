@@ -11,18 +11,18 @@ d3.slider = function module() {
   // Public variables width default settings
   var min = 0,
       max = 100,
-      step = 0.01, 
+      step = 0.01,
       animate = true,
       orientation = "horizontal",
       axis = false,
       margin = 50,
       value,
       active = 1,
-      scale; 
+      scale;
 
   // Private variables
   var axisScale,
-      dispatch = d3.dispatch("slide"),
+      dispatch = d3.dispatch("slide", "slideend"),
       formatPercent = d3.format(".2%"),
       tickFormat = d3.format(".0"),
       sliderLength;
@@ -33,15 +33,18 @@ d3.slider = function module() {
       // Create scale if not defined by user
       if (!scale) {
         scale = d3.scale.linear().domain([min, max]);
-      }  
+      }
 
       // Start value
-      value = value || scale.domain()[0]; 
+      value = value || scale.domain()[0];
 
       // DIV container
       var div = d3.select(this).classed("d3-slider d3-slider-" + orientation, true);
       
       var drag = d3.behavior.drag();
+      drag.on('dragend', function () {
+        dispatch.slideend(d3.event, value);
+      })
 
       // Slider handle
       //if range slider, create two
@@ -89,7 +92,7 @@ d3.slider = function module() {
         } else {
           handle1.style("left", formatPercent(scale(value)));
           drag.on("drag", onDragHorizontal);
-        }  
+        }
         
         sliderLength = parseInt(div.style("width"), 10);
 
@@ -101,10 +104,10 @@ d3.slider = function module() {
           divRange = d3.select(this).append('div').classed("d3-slider-range-vertical", true);
 
           handle1.style("bottom", formatPercent(scale(value[ 0 ])));
-          divRange.style("height", parseFloat(formatPercent(scale(value[ 1 ]))) - parseFloat(formatPercent(scale(value[ 0 ]))) + "%");
+          divRange.style("bottom", formatPercent(scale(value[ 0 ])));
           drag.on("drag", onDragVertical);
 
-          var top = 100 - parseFloat(formatPercent(scale(value[ 1 ]))) - 10;
+          var top = 100 - parseFloat(formatPercent(scale(value[ 1 ])));
           handle2.style("bottom", formatPercent(scale(value[ 1 ])));
           divRange.style("top", top+"%");
           drag.on("drag", onDragVertical);
@@ -112,7 +115,7 @@ d3.slider = function module() {
         } else {
           handle1.style("bottom", formatPercent(scale(value)));
           drag.on("drag", onDragVertical);
-        } 
+        }
         
         sliderLength = parseInt(div.style("height"), 10);
 
@@ -133,7 +136,7 @@ d3.slider = function module() {
               .tickFormat(tickFormat)
               .orient((orientation === "horizontal") ? "bottom" :  "right");
 
-        }      
+        }
 
         // Copy slider scale to move from percentages to pixels
         axisScale = scale.copy().range([0, sliderLength]);
@@ -149,39 +152,39 @@ d3.slider = function module() {
         // Horizontal axis
         if (orientation === "horizontal") {
 
-          svg.style("left", -margin);
+          svg.style("left", -margin + "px");
 
-          svg.attr({ 
-            width: sliderLength + margin * 2, 
+          svg.attr({
+            width: sliderLength + margin * 2,
             height: margin
-          });  
+          });
 
           if (axis.orient() === "top") {
-            svg.style("top", -margin);  
-            g.attr("transform", "translate(" + margin + "," + margin + ")")
+            svg.style("top", -margin + "px");
+            g.attr("transform", "translate(" + margin + "," + margin + ")");
           } else { // bottom
-            g.attr("transform", "translate(" + margin + ",0)")
+            g.attr("transform", "translate(" + margin + ",0)");
           }
 
         } else { // Vertical
 
-          svg.style("top", -margin);
+          svg.style("top", -margin + "px");
 
-          svg.attr({ 
-            width: margin, 
+          svg.attr({
+            width: margin,
             height: sliderLength + margin * 2
-          });      
+          });
 
           if (axis.orient() === "left") {
-            svg.style("left", -margin);
-            g.attr("transform", "translate(" + margin + "," + margin + ")")  
+            svg.style("left", -margin + "px");
+            g.attr("transform", "translate(" + margin + "," + margin + ")");
           } else { // right          
-            g.attr("transform", "translate(" + 0 + "," + margin + ")")      
+            g.attr("transform", "translate(" + 0 + "," + margin + ")");
           }
 
         }
 
-        g.call(axis);  
+        g.call(axis);
 
       }
 
@@ -189,10 +192,11 @@ d3.slider = function module() {
       // Move slider handle on click/drag
       function moveHandle(pos) {
 
-        var newValue = stepValue(scale.invert(pos / sliderLength));
+        var newValue = stepValue(scale.invert(pos / containerSize())),
+            currentValue = value.length ? value[active - 1]: value;
 
-        if (value !== newValue) {
-          var oldPos = formatPercent(scale(stepValue(value))),
+        if (currentValue !== newValue) {
+          var oldPos = formatPercent(scale(stepValue(currentValue))),
               newPos = formatPercent(scale(stepValue(newValue))),
               position = (orientation === "horizontal") ? "left" : "bottom";
 
@@ -206,30 +210,30 @@ d3.slider = function module() {
           if ( value[ 0 ] >= value[ 1 ] ) return;
           if ( active === 1 ) {
             
-            var height = parseFloat(formatPercent(scale(value[ 1 ]))) - parseFloat( newPos );
-            (position === "left") ? divRange.style("left", newPos+"%") : divRange.style( { "height" : height + "%" });
+            if (value.length === 2) {
+              (position === "left") ? divRange.style("left", newPos) : divRange.style("bottom", newPos);
+            }
 
             if (animate) {
               handle1.transition()
                   .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
                   .duration((typeof animate === "number") ? animate : 250);
             } else {
-              handle1.style(position, newPos);           
+              handle1.style(position, newPos);
             }
           } else {
             
             var width = 100 - parseFloat(newPos);
-            var top = 100 - parseFloat(newPos) - 10;
-            var height = parseFloat( newPos ) - parseFloat(formatPercent(scale(value[ 0 ])));
+            var top = 100 - parseFloat(newPos);
 
-            (position === "left") ? divRange.style("right", width+"%") : divRange.style( { "top": top+"%", "height" : height + "%" });
+            (position === "left") ? divRange.style("right", width + "%") : divRange.style("top", top + "%");
             
             if (animate) {
               handle2.transition()
                   .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
                   .duration((typeof animate === "number") ? animate : 250);
             } else {
-              handle2.style(position, newPos);           
+              handle2.style(position, newPos);
             }
           }
         }
@@ -239,6 +243,10 @@ d3.slider = function module() {
 
       // Calculate nearest step value
       function stepValue(val) {
+
+        if (val === scale.domain()[0] || val === scale.domain()[1]) {
+          return val;
+        }
 
         var valModStep = (val - scale.domain()[0]) % step,
             alignValue = val - valModStep;
@@ -253,11 +261,15 @@ d3.slider = function module() {
 
 
       function onClickHorizontal() {
-        //moveHandle(d3.event.offsetX || d3.event.layerX);
+        if (!value.length) {
+          moveHandle(d3.event.offsetX || d3.event.layerX);
+        }
       }
 
       function onClickVertical() {
-        //moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
+        if (!value.length) {
+          moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
+        }
       }
 
       function onDragHorizontal() {
@@ -276,7 +288,7 @@ d3.slider = function module() {
           active = 2;
         }
         moveHandle(sliderLength - Math.max(0, Math.min(sliderLength, d3.event.y)));
-      }      
+      }
 
       function stopPropagation() {
         d3.event.stopPropagation();
@@ -284,67 +296,67 @@ d3.slider = function module() {
 
     });
 
-  } 
+  }
 
   // Getter/setter functions
   slider.min = function(_) {
     if (!arguments.length) return min;
     min = _;
     return slider;
-  } 
+  };
 
   slider.max = function(_) {
     if (!arguments.length) return max;
     max = _;
     return slider;
-  }     
+  };
 
   slider.step = function(_) {
     if (!arguments.length) return step;
     step = _;
     return slider;
-  }   
+  };
 
   slider.animate = function(_) {
     if (!arguments.length) return animate;
     animate = _;
     return slider;
-  } 
+  };
 
   slider.orientation = function(_) {
     if (!arguments.length) return orientation;
     orientation = _;
     return slider;
-  }     
+  };
 
   slider.axis = function(_) {
     if (!arguments.length) return axis;
     axis = _;
     return slider;
-  }     
+  };
 
   slider.margin = function(_) {
     if (!arguments.length) return margin;
     margin = _;
     return slider;
-  }  
+  };
 
   slider.value = function(_) {
     if (!arguments.length) return value;
     value = _;
     return slider;
-  }  
+  };
 
   slider.scale = function(_) {
     if (!arguments.length) return scale;
     scale = _;
     return slider;
-  }  
+  };
 
   d3.rebind(slider, dispatch, "on");
 
   return slider;
 
-}
+};
 
 
