@@ -192,7 +192,7 @@ d3.slider = function module() {
       // Move slider handle on click/drag
       function moveHandle(pos) {
 
-        var newValue = stepValue(scale.invert(pos / containerSize())),
+        var newValue = stepValue(scale.invert(pos / sliderLength)),
             currentValue = value.length ? value[active - 1]: value;
 
         if (currentValue !== newValue) {
