@@ -152,7 +152,7 @@ d3.slider = function module() {
         // Horizontal axis
         if (orientation === "horizontal") {
 
-          svg.style("left", -margin + "px");
+          svg.style("margin-left", -margin + "px");
 
           svg.attr({
             width: sliderLength + margin * 2,
