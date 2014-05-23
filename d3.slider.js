@@ -4,8 +4,25 @@
     Copyright (c) 2013, Bjorn Sandvik - http://blog.thematicmapping.org
     BSD license: http://opensource.org/licenses/BSD-3-Clause
 */
-
-d3.slider = function module() {
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(['d3'], factory);
+  } else if (typeof exports === 'object') {
+    if (process.browser) {
+      // Browserify. Import css too using cssify.
+      require('./d3.slider.css');
+    }
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory(require('d3'));
+  } else {
+    // Browser globals (root is window)
+    root.d3.slider = factory(root.d3);
+  }
+}(this, function (d3) {
+return function module() {
   "use strict";
 
   // Public variables width default settings
@@ -357,6 +374,5 @@ d3.slider = function module() {
 
   return slider;
 
-};
-
-
+}
+}));

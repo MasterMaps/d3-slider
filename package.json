@@ -1,0 +1,30 @@
+{
+  "name": "d3.slider",
+  "version": "0.1.0",
+  "description": "D3.js Slider",
+  "main": "d3.slider.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/turban/d3.slider"
+  },
+  "author": "turban",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/turban/d3.slider/issues"
+  },
+  "homepage": "https://github.com/turban/d3.slider",
+  "browserify": {
+    "transform": [
+      "cssify"
+    ]
+  },
+  "dependencies": {
+    "d3": "~3.4.8",
+    "browserify": "~4.1.5",
+    "cssify": "~0.5.1"
+  },
+  "devDependencies": {}
+}
