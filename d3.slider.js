@@ -262,13 +262,13 @@ d3.slider = function module() {
 
       function onClickHorizontal() {
         if (!value.length) {
-          moveHandle(d3.event.offsetX || d3.event.layerX);
+          moveHandle(Math.max(0, Math.min(sliderLength, d3.event.offsetX || d3.event.layerX)));
         }
       }
 
       function onClickVertical() {
         if (!value.length) {
-          moveHandle(sliderLength - d3.event.offsetY || d3.event.layerY);
+          moveHandle(sliderLength - Math.max(0, Math.min(sliderLength, d3.event.offsetY || d3.event.layerY)));
         }
       }
 
