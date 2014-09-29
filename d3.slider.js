@@ -42,6 +42,8 @@ return function module() {
       dispatch = d3.dispatch("slide", "slideend"),
       formatPercent = d3.format(".2%"),
       tickFormat = d3.format(".0"),
+      handle1,
+      handle2 = null,
       sliderLength;
 
   function slider(selection) {
@@ -65,7 +67,7 @@ return function module() {
 
       // Slider handle
       //if range slider, create two
-      var handle1, handle2 = null, divRange;
+      var divRange;
 
       if ( value.length == 2 ) {
         handle1 = div.append("a")
@@ -205,87 +207,17 @@ return function module() {
 
       }
 
-
-      // Move slider handle on click/drag
-      function moveHandle(pos) {
-
-        var newValue = stepValue(scale.invert(pos / sliderLength)),
-            currentValue = value.length ? value[active - 1]: value;
-
-        if (currentValue !== newValue) {
-          var oldPos = formatPercent(scale(stepValue(currentValue))),
-              newPos = formatPercent(scale(stepValue(newValue))),
-              position = (orientation === "horizontal") ? "left" : "bottom";
-
-          if ( value.length === 2) {
-            value[ active - 1 ] = newValue;
-            dispatch.slide(d3.event, value );
-          } else {
-            dispatch.slide(d3.event.sourceEvent || d3.event, value = newValue);
-          }
-
-          if ( value[ 0 ] >= value[ 1 ] ) return;
-          if ( active === 1 ) {
-            
-            if (value.length === 2) {
-              (position === "left") ? divRange.style("left", newPos) : divRange.style("bottom", newPos);
-            }
-
-            if (animate) {
-              handle1.transition()
-                  .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
-                  .duration((typeof animate === "number") ? animate : 250);
-            } else {
-              handle1.style(position, newPos);
-            }
-          } else {
-            
-            var width = 100 - parseFloat(newPos);
-            var top = 100 - parseFloat(newPos);
-
-            (position === "left") ? divRange.style("right", width + "%") : divRange.style("top", top + "%");
-            
-            if (animate) {
-              handle2.transition()
-                  .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
-                  .duration((typeof animate === "number") ? animate : 250);
-            } else {
-              handle2.style(position, newPos);
-            }
-          }
-        }
-
-      }
-
-
-      // Calculate nearest step value
-      function stepValue(val) {
-
-        if (val === scale.domain()[0] || val === scale.domain()[1]) {
-          return val;
-        }
-
-        var valModStep = (val - scale.domain()[0]) % step,
-            alignValue = val - valModStep;
-
-        if (Math.abs(valModStep) * 2 >= step) {
-          alignValue += (valModStep > 0) ? step : -step;
-        }
-
-        return alignValue;
-
-      }
-
-
       function onClickHorizontal() {
         if (!value.length) {
-          moveHandle(Math.max(0, Math.min(sliderLength, d3.event.offsetX || d3.event.layerX)));
+          var pos = Math.max(0, Math.min(sliderLength, d3.event.offsetX || d3.event.layerX));
+          moveHandle(stepValue(scale.invert(pos / sliderLength)));
         }
       }
 
       function onClickVertical() {
         if (!value.length) {
-          moveHandle(sliderLength - Math.max(0, Math.min(sliderLength, d3.event.offsetY || d3.event.layerY)));
+          var pos = sliderLength - Math.max(0, Math.min(sliderLength, d3.event.offsetY || d3.event.layerY));
+          moveHandle(stepValue(scale.invert(pos / sliderLength)));
         }
       }
 
@@ -295,7 +227,8 @@ return function module() {
         } else if ( d3.event.sourceEvent.target.id == "handle-two" ) {
           active = 2;
         }
-        moveHandle(Math.max(0, Math.min(sliderLength, d3.event.x)));
+        var pos = Math.max(0, Math.min(sliderLength, d3.event.x));
+        moveHandle(stepValue(scale.invert(pos / sliderLength)));
       }
 
       function onDragVertical() {
@@ -304,7 +237,8 @@ return function module() {
         } else if ( d3.event.sourceEvent.target.id == "handle-two" ) {
           active = 2;
         }
-        moveHandle(sliderLength - Math.max(0, Math.min(sliderLength, d3.event.y)));
+        var pos = sliderLength - Math.max(0, Math.min(sliderLength, d3.event.y))
+        moveHandle(stepValue(scale.invert(pos / sliderLength)));
       }
 
       function stopPropagation() {
@@ -312,6 +246,76 @@ return function module() {
       }
 
     });
+
+  }
+
+  // Move slider handle on click/drag
+  function moveHandle(newValue) {
+    var currentValue = value.length ? value[active - 1]: value;
+
+    if (currentValue !== newValue) {
+      var oldPos = formatPercent(scale(stepValue(currentValue))),
+          newPos = formatPercent(scale(stepValue(newValue))),
+          position = (orientation === "horizontal") ? "left" : "bottom";
+
+      if ( value.length === 2) {
+        value[ active - 1 ] = newValue;
+        if (d3.event) {
+          dispatch.slide(d3.event, value );
+        };
+      } else {
+        if (d3.event) {
+          dispatch.slide(d3.event.sourceEvent || d3.event, value = newValue);
+        };
+      }
+
+      if ( value[ 0 ] >= value[ 1 ] ) return;
+      if ( active === 1 ) {
+        
+        if (value.length === 2) {
+          (position === "left") ? divRange.style("left", newPos) : divRange.style("bottom", newPos);
+        }
+
+        if (animate) {
+          handle1.transition()
+              .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
+              .duration((typeof animate === "number") ? animate : 250);
+        } else {
+          handle1.style(position, newPos);
+        }
+      } else {
+        
+        var width = 100 - parseFloat(newPos);
+        var top = 100 - parseFloat(newPos);
+
+        (position === "left") ? divRange.style("right", width + "%") : divRange.style("top", top + "%");
+        
+        if (animate) {
+          handle2.transition()
+              .styleTween(position, function() { return d3.interpolate(oldPos, newPos); })
+              .duration((typeof animate === "number") ? animate : 250);
+        } else {
+          handle2.style(position, newPos);
+        }
+      }
+    }
+  }
+
+  // Calculate nearest step value
+  function stepValue(val) {
+
+    if (val === scale.domain()[0] || val === scale.domain()[1]) {
+      return val;
+    }
+
+    var valModStep = (val - scale.domain()[0]) % step,
+        alignValue = val - valModStep;
+
+    if (Math.abs(valModStep) * 2 >= step) {
+      alignValue += (valModStep > 0) ? step : -step;
+    }
+
+    return alignValue;
 
   }
 
@@ -360,6 +364,9 @@ return function module() {
 
   slider.value = function(_) {
     if (!arguments.length) return value;
+    if (value) {
+      moveHandle(_);
+    };
     value = _;
     return slider;
   };
