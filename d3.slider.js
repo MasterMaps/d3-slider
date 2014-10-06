@@ -35,6 +35,7 @@ return function module() {
       margin = 50,
       value,
       active = 1,
+      snap = false,
       scale;
 
   // Private variables
@@ -251,12 +252,11 @@ return function module() {
 
   // Move slider handle on click/drag
   function moveHandle(newValue) {
-    var currentValue = value.length ? value[active - 1]: value;
-
-    if (currentValue !== newValue) {
-      var oldPos = formatPercent(scale(stepValue(currentValue))),
-          newPos = formatPercent(scale(stepValue(newValue))),
-          position = (orientation === "horizontal") ? "left" : "bottom";
+    var currentValue = value.length ? value[active - 1]: value,
+        oldPos = formatPercent(scale(stepValue(currentValue))),
+        newPos = formatPercent(scale(stepValue(newValue))),
+        position = (orientation === "horizontal") ? "left" : "bottom";
+    if (oldPos !== newPos) {
 
       if ( value.length === 2) {
         value[ active - 1 ] = newValue;
@@ -271,7 +271,6 @@ return function module() {
 
       if ( value[ 0 ] >= value[ 1 ] ) return;
       if ( active === 1 ) {
-        
         if (value.length === 2) {
           (position === "left") ? divRange.style("left", newPos) : divRange.style("bottom", newPos);
         }
@@ -308,12 +307,29 @@ return function module() {
       return val;
     }
 
-    var valModStep = (val - scale.domain()[0]) % step,
-        alignValue = val - valModStep;
+    var alignValue = val;
+    if (snap) {
+      var val_i = scale(val);
+      var dist = scale.ticks().map(function(d) {return val_i - scale(d);});
+      var i = -1,
+          index = 0,
+          r = scale.range()[1];
+      do {
+          i++;
+          if (Math.abs(dist[i]) < r) {
+            r = Math.abs(dist[i]);
+            index = i;
+          };
+      } while (dist[i] > 0 && i < dist.length - 1);
+      alignValue = scale.ticks()[index];
+    } else{
+      var valModStep = (val - scale.domain()[0]) % step;
+      alignValue = val - valModStep;
 
-    if (Math.abs(valModStep) * 2 >= step) {
-      alignValue += (valModStep > 0) ? step : -step;
-    }
+      if (Math.abs(valModStep) * 2 >= step) {
+        alignValue += (valModStep > 0) ? step : -step;
+      }
+    };
 
     return alignValue;
 
@@ -368,6 +384,12 @@ return function module() {
       moveHandle(stepValue(_));
     };
     value = _;
+    return slider;
+  };
+
+  slider.snap = function(_) {
+    if (!arguments.length) return snap;
+    snap = _;
     return slider;
   };
 
