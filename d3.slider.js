@@ -211,14 +211,18 @@ return function module() {
       function onClickHorizontal() {
         if (toType(value) != "array") {
           var pos = Math.max(0, Math.min(sliderLength, d3.event.offsetX || d3.event.layerX));
-          moveHandle(stepValue(scale.invert(pos / sliderLength)));
+          moveHandle(scale.invert ? 
+                      stepValue(scale.invert(pos / sliderLength))
+                    : nearestTick(pos / sliderLength));
         }
       }
 
       function onClickVertical() {
         if (toType(value) != "array") {
           var pos = sliderLength - Math.max(0, Math.min(sliderLength, d3.event.offsetY || d3.event.layerY));
-          moveHandle(stepValue(scale.invert(pos / sliderLength)));
+          moveHandle(scale.invert ? 
+                      stepValue(scale.invert(pos / sliderLength))
+                    : nearestTick(pos / sliderLength));
         }
       }
 
@@ -229,7 +233,9 @@ return function module() {
           active = 2;
         }
         var pos = Math.max(0, Math.min(sliderLength, d3.event.x));
-        moveHandle(stepValue(scale.invert(pos / sliderLength)));
+        moveHandle(scale.invert ? 
+                    stepValue(scale.invert(pos / sliderLength))
+                  : nearestTick(pos / sliderLength));
       }
 
       function onDragVertical() {
@@ -239,7 +245,9 @@ return function module() {
           active = 2;
         }
         var pos = sliderLength - Math.max(0, Math.min(sliderLength, d3.event.y))
-        moveHandle(stepValue(scale.invert(pos / sliderLength)));
+        moveHandle(scale.invert ? 
+                    stepValue(scale.invert(pos / sliderLength))
+                  : nearestTick(pos / sliderLength));
       }
 
       function stopPropagation() {
@@ -309,20 +317,7 @@ return function module() {
 
     var alignValue = val;
     if (snap) {
-      var val_i = scale(val);
-      var ticks = scale.ticks ? scale.ticks() : scale.domain();
-      var dist = ticks.map(function(d) {return val_i - scale(d);});
-      var i = -1,
-          index = 0,
-          r = scale.ticks ? scale.range()[1] : scale.rangeExtent()[1];
-      do {
-          i++;
-          if (Math.abs(dist[i]) < r) {
-            r = Math.abs(dist[i]);
-            index = i;
-          };
-      } while (dist[i] > 0 && i < dist.length - 1);
-      alignValue = ticks[index];
+      alignValue = nearestTick(scale(val));
     } else{
       var valModStep = (val - scale.domain()[0]) % step;
       alignValue = val - valModStep;
@@ -335,6 +330,24 @@ return function module() {
     return alignValue;
 
   }
+
+  // Find the nearest tick
+  function nearestTick(pos) {
+    var ticks = scale.ticks ? scale.ticks() : scale.domain();
+    var dist = ticks.map(function(d) {return pos - scale(d);});
+    var i = -1,
+        index = 0,
+        r = scale.ticks ? scale.range()[1] : scale.rangeExtent()[1];
+    do {
+        i++;
+        if (Math.abs(dist[i]) < r) {
+          r = Math.abs(dist[i]);
+          index = i;
+        };
+    } while (dist[i] > 0 && i < dist.length - 1);
+
+    return ticks[index];
+  };
 
   // Return the type of an object
   function toType(v) {
