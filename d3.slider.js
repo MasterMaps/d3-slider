@@ -70,7 +70,7 @@ return function module() {
       //if range slider, create two
       var divRange;
 
-      if ( value.length == 2 ) {
+      if (toType(value) == "array" && value.length == 2) {
         handle1 = div.append("a")
           .classed("d3-slider-handle", true)
           .attr("xlink:href", "#")
@@ -97,7 +97,7 @@ return function module() {
 
         div.on("click", onClickHorizontal);
         
-        if ( value.length == 2 ) {
+        if (toType(value) == "array" && value.length == 2) {
           divRange = d3.select(this).append('div').classed("d3-slider-range", true);
 
           handle1.style("left", formatPercent(scale(value[ 0 ])));
@@ -120,7 +120,7 @@ return function module() {
 
         div.on("click", onClickVertical);
         drag.on("drag", onDragVertical);
-        if ( value.length == 2 ) {
+        if (toType(value) == "array" && value.length == 2) {
           divRange = d3.select(this).append('div').classed("d3-slider-range-vertical", true);
 
           handle1.style("bottom", formatPercent(scale(value[ 0 ])));
@@ -159,7 +159,7 @@ return function module() {
         }
 
         // Copy slider scale to move from percentages to pixels
-        axisScale = scale.copy().range([0, sliderLength]);
+        axisScale = scale.ticks ? scale.copy().range([0, sliderLength]) : scale.copy().rangePoints([0, sliderLength], 0.5);
           axis.scale(axisScale);
 
           // Create SVG axis container
@@ -209,14 +209,14 @@ return function module() {
       }
 
       function onClickHorizontal() {
-        if (!value.length) {
+        if (toType(value) != "array") {
           var pos = Math.max(0, Math.min(sliderLength, d3.event.offsetX || d3.event.layerX));
           moveHandle(stepValue(scale.invert(pos / sliderLength)));
         }
       }
 
       function onClickVertical() {
-        if (!value.length) {
+        if (toType(value) != "array") {
           var pos = sliderLength - Math.max(0, Math.min(sliderLength, d3.event.offsetY || d3.event.layerY));
           moveHandle(stepValue(scale.invert(pos / sliderLength)));
         }
@@ -252,13 +252,13 @@ return function module() {
 
   // Move slider handle on click/drag
   function moveHandle(newValue) {
-    var currentValue = value.length ? value[active - 1]: value,
+    var currentValue = toType(value) == "array"  && value.length == 2 ? value[active - 1]: value,
         oldPos = formatPercent(scale(stepValue(currentValue))),
         newPos = formatPercent(scale(stepValue(newValue))),
         position = (orientation === "horizontal") ? "left" : "bottom";
     if (oldPos !== newPos) {
 
-      if ( value.length === 2) {
+      if (toType(value) == "array" && value.length == 2) {
         value[ active - 1 ] = newValue;
         if (d3.event) {
           dispatch.slide(d3.event, value );
@@ -271,7 +271,7 @@ return function module() {
 
       if ( value[ 0 ] >= value[ 1 ] ) return;
       if ( active === 1 ) {
-        if (value.length === 2) {
+        if (toType(value) == "array" && value.length == 2) {
           (position === "left") ? divRange.style("left", newPos) : divRange.style("bottom", newPos);
         }
 
@@ -310,10 +310,11 @@ return function module() {
     var alignValue = val;
     if (snap) {
       var val_i = scale(val);
-      var dist = scale.ticks().map(function(d) {return val_i - scale(d);});
+      var ticks = scale.ticks ? scale.ticks() : scale.domain();
+      var dist = ticks.map(function(d) {return val_i - scale(d);});
       var i = -1,
           index = 0,
-          r = scale.range()[1];
+          r = scale.ticks ? scale.range()[1] : scale.rangeExtent()[1];
       do {
           i++;
           if (Math.abs(dist[i]) < r) {
@@ -321,7 +322,7 @@ return function module() {
             index = i;
           };
       } while (dist[i] > 0 && i < dist.length - 1);
-      alignValue = scale.ticks()[index];
+      alignValue = ticks[index];
     } else{
       var valModStep = (val - scale.domain()[0]) % step;
       alignValue = val - valModStep;
@@ -334,6 +335,11 @@ return function module() {
     return alignValue;
 
   }
+
+  // Return the type of an object
+  function toType(v) {
+    return ({}).toString.call(v).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+  };
 
   // Getter/setter functions
   slider.min = function(_) {
