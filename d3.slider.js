@@ -45,6 +45,7 @@ return function module() {
       tickFormat = d3.format(".0"),
       handle1,
       handle2 = null,
+      divRange,
       sliderLength;
 
   function slider(selection) {
@@ -68,7 +69,7 @@ return function module() {
 
       // Slider handle
       //if range slider, create two
-      var divRange;
+      // var divRange;
 
       if (toType(value) == "array" && value.length == 2) {
         handle1 = div.append("a")
