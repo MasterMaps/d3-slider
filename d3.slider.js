@@ -135,7 +135,6 @@ return function module() {
 
         } else {
           handle1.style("bottom", formatPercent(scale(value)));
-          console.log("hello: "+scale(value));
           drag.on("drag", onDragVertical);
         }
         
