@@ -160,7 +160,10 @@ return function module() {
         }
 
         // Copy slider scale to move from percentages to pixels
-        axisScale = scale.ticks ? scale.copy().range([0, sliderLength]) : scale.copy().rangePoints([0, sliderLength], 0.5);
+        if(orientation == "horizontal")
+           axisScale = scale.ticks ? scale.copy().range([0,sliderLength]) : scale.copy().rangePoints([0,sliderLength], 0.5);  
+       else
+           axisScale = scale.ticks ? scale.copy().range([sliderLength, 0]) : scale.copy().rangePoints([sliderLength, 0], 0.5);
           axis.scale(axisScale);
 
           // Create SVG axis container
