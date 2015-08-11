@@ -18,8 +18,8 @@
     "type": "git",
     "url": "https://github.com/MasterMaps/d3-slider.git"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "devDependencies": {
+    "d3-scale": "^0.1.1"
   }
 }

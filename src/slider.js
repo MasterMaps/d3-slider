@@ -13,5 +13,4 @@ Slider.prototype = slider.prototype = {
 
 };
 
-
 export default slider;
