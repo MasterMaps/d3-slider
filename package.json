@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "d3-bundler": "~0.2.7",
+    "d3-format": "^0.3.0",
     "d3-scale": "^0.1.1",
     "d3-selection": "^0.4.7",
     "faucet": "0.0",
