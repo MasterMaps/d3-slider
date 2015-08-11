@@ -18,7 +18,11 @@
     "type": "git",
     "url": "https://github.com/MasterMaps/d3-slider.git"
   },
-  "scripts": {},
+  "scripts": {
+    "pretest": "mkdir -p build && d3-bundler --polyfill-map --format=umd --name=d3 -- d3.js > build/d3.js",
+    "test": "faucet `find test -name '*-test.js'`",
+    "prepublish": "npm run test && uglifyjs build/d3.js -c -m -o build/d3.min.js && rm -f build/d3.zip && zip -j build/d3.zip -- LICENSE README.md build/d3.js build/d3.min.js"
+  },
   "devDependencies": {
     "d3-scale": "^0.1.1",
     "d3-bundler": "^0.2.7",
