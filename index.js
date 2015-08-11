@@ -1,5 +1,3 @@
 import slider from "./src/slider";
 
-export {
-  slider
-};
+export default slider;

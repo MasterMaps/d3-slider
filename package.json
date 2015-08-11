@@ -24,8 +24,9 @@
     "prepublish": "npm run test && uglifyjs build/slider.js -c -m -o build/slider.min.js && rm -f build/slider.zip && zip -j build/slider.zip -- LICENSE README.md build/slider.js build/slider.min.js"
   },
   "devDependencies": {
-    "d3-scale": "^0.1.1",
     "d3-bundler": "~0.2.7",
+    "d3-scale": "^0.1.1",
+    "d3-selection": "^0.4.7",
     "faucet": "0.0",
     "tape": "4",
     "uglify-js": "2"
