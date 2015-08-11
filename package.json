@@ -20,6 +20,7 @@
   },
   "scripts": {},
   "devDependencies": {
+    "d3-bundler": "^0.2.7",
     "d3-scale": "^0.1.1"
   }
 }
