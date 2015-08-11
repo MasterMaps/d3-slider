@@ -6,7 +6,7 @@ export function Slider (root, depth) {
 };
 
 function slider() {
-  return new Transition([document.documentElement], 1);
+  return new Slider([document.documentElement], 1);
 }
 
 Slider.prototype = slider.prototype = {
