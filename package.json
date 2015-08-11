@@ -12,23 +12,22 @@
     "name": "Bjørn Sandvik",
     "url": "http://mastermaps.net"
   },
-  "main": "build/d3",
+  "main": "build/slider",
   "jsnext:main": "index",
   "repository": {
     "type": "git",
     "url": "https://github.com/MasterMaps/d3-slider.git"
   },
   "scripts": {
-    "pretest": "mkdir -p build && d3-bundler --polyfill-map --format=umd --name=d3 -- d3.js > build/d3.js",
+    "pretest": "mkdir -p build && d3-bundler --polyfill-map --format=umd --name=slider -- index.js > build/slider.js",
     "test": "faucet `find test -name '*-test.js'`",
-    "prepublish": "npm run test && uglifyjs build/d3.js -c -m -o build/d3.min.js && rm -f build/d3.zip && zip -j build/d3.zip -- LICENSE README.md build/d3.js build/d3.min.js"
+    "prepublish": "npm run test && uglifyjs build/slider.js -c -m -o build/slider.min.js && rm -f build/slider.zip && zip -j build/slider.zip -- LICENSE README.md build/slider.js build/slider.min.js"
   },
   "devDependencies": {
     "d3-scale": "^0.1.1",
-    "d3-bundler": "^0.2.7",
+    "d3-bundler": "~0.2.7",
     "faucet": "0.0",
-    "jsdom": "3",
     "tape": "4",
-    "uglifyjs": "2"
+    "uglify-js": "2"
   }
 }
