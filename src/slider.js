@@ -5,14 +5,16 @@ import {format} from "d3-format";     // https://github.com/d3/d3-format
 export default function () {
 
   // Public variables width default settings
-  var min = 0,
-      max = 100,
+  var range = [0, 100],
+      step = 1,
       orientation = "horizontal",
+      animate = true,
       value,
-      scale;
+      scale;      
 
   // Private variables
   var formatPercent = format(".2%"),
+      sliderEl,
       handle;
 
   function slider(selection) {
@@ -23,28 +25,29 @@ export default function () {
         //scale = linear().domain([min, max]);
       }
 
-      // Start value
-      value = value || scale.domain()[0];
+      // Create slider div
+      sliderEl = select(this).class("d3-slider d3-slider-" + orientation, true)
+          .event("click", onSliderClick);
 
-      // DIV container
-      var div = select(this).class("d3-slider d3-slider-" + orientation, true);
-
-      // Slider handle
-      handle = div.append("a")
+      // Create slider handle
+      handle = sliderEl.append("a")
           .class("d3-slider-handle", true)
           .attr("xlink:href", "#");
 
-      // Horizontal slider
-      if (orientation === "horizontal") {
-        moveHandle(value);
-      }
-
+      moveHandle(value || scale.domain()[0]);
     });
   }
 
-  function moveHandle(newValue) {
-    var position = (orientation === "horizontal") ? "left" : "bottom";
-    handle.style(position, formatPercent(scale(newValue)));
+  function onSliderClick() {
+    if (orientation === "horizontal") {
+      moveHandle(scale.invert(event.offsetX / parseInt(sliderEl.style("width"), 10)));
+    } else {
+      moveHandle(scale.invert(event.offsetY / parseInt(sliderEl.style("height"), 10)));
+    }
+  }
+
+  function moveHandle(value) {
+    handle.style((orientation === "horizontal") ? "left" : "bottom", formatPercent(scale(value)));
   }
 
   slider.scale = function(_) {
@@ -59,5 +62,30 @@ export default function () {
     return slider;
   };
 
+  slider.orientation = function(_) {
+    if (!arguments.length) return orientation;
+    orientation = _;
+    return slider;
+  }  
+
+  slider.step = function(_) {
+    if (!arguments.length) return step;
+    step = _;
+    return slider;
+  }   
+
+  slider.animate = function(_) {
+    if (!arguments.length) return animate;
+    animate = _;
+    return slider;
+  } 
+
   return slider;
 };
+
+/* 
+
+Other sliders: 
+http://refreshless.com/nouislider/
+
+*/
