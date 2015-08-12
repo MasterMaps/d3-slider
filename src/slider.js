@@ -1,5 +1,4 @@
 import {select} from "d3-selection";  // https://github.com/d3/d3-selection
-import {format} from "d3-format";     // https://github.com/d3/d3-format
 //import {linear} from "d3-scale";    // https://github.com/d3/d3-scale
 
 export default function () {
@@ -13,8 +12,7 @@ export default function () {
       scale;      
 
   // Private variables
-  var formatPercent = format(".2%"),
-      sliderEl,
+  var sliderEl,
       handle;
 
   function slider(selection) {
@@ -24,6 +22,7 @@ export default function () {
       if (!scale) {
         //scale = linear().domain([min, max]);
       }
+      scale.domain([0, 100]); // Percent
 
       // Create slider div
       sliderEl = select(this).class("d3-slider d3-slider-" + orientation, true)
@@ -40,14 +39,14 @@ export default function () {
 
   function onSliderClick() {
     if (orientation === "horizontal") {
-      moveHandle(scale.invert(event.offsetX / parseInt(sliderEl.style("width"), 10)));
+      moveHandle(scale(event.offsetX / parseInt(sliderEl.style("width"), 10) * 100));
     } else {
-      moveHandle(scale.invert(event.offsetY / parseInt(sliderEl.style("height"), 10)));
+      moveHandle(scale(event.offsetY / parseInt(sliderEl.style("height"), 10) * 100));
     }
   }
 
   function moveHandle(value) {
-    handle.style((orientation === "horizontal") ? "left" : "bottom", formatPercent(scale(value)));
+    handle.style((orientation === "horizontal") ? "left" : "bottom", scale.invert(value) + "%");
   }
 
   slider.scale = function(_) {
