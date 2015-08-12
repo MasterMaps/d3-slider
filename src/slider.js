@@ -46,7 +46,20 @@ export default function () {
   }
 
   function moveHandle(value) {
+    console.log("move", value, stepValue(value));
     handle.style((orientation === "horizontal") ? "left" : "bottom", scale.invert(value) + "%");
+  }
+
+  // Calculate nearest step value
+  function stepValue(value) {
+    var valueModStep = (value - scale.range()[0]) % step,
+        alignValue = value - valueModStep;
+
+    if (Math.abs(valueModStep) * 2 >= step) {
+      alignValue += (valueModStep > 0) ? step : -step;
+    }
+
+    return alignValue;
   }
 
   slider.scale = function(_) {
