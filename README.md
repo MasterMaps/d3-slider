@@ -1,6 +1,6 @@
 # d3-slider
 
-Pure D3 slider.
+Slider for D3.js 4.0.
 
 ## API Reference
 
