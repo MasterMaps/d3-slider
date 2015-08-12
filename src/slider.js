@@ -7,13 +7,14 @@ export default function () {
   var range = [0, 100],
       step = 1,
       orientation = "horizontal",
-      animate = true,
       value,
       scale;      
 
   // Private variables
   var sliderEl,
-      handle;
+      rangeEl,
+      lowerHandle,
+      upperHandle;
 
   function slider(selection) {
     selection.each(function() {
@@ -28,26 +29,53 @@ export default function () {
       sliderEl = select(this).class("d3-slider d3-slider-" + orientation, true)
           .event("click", onSliderClick);
 
-      // Create slider handle
-      handle = sliderEl.append("a")
-          .class("d3-slider-handle", true)
-          .attr("xlink:href", "#");
+      rangeEl = sliderEl.append("div")
+          .class("d3-slider-range", true);
 
-      moveHandle(value || scale.domain()[0]);
+      // Create slider handle
+      lowerHandle = createHandle("lower");
+
+      if (value && value.length === 2) { // Two handles
+        upperHandle = createHandle("upper");
+      }
+
+      moveHandle(value || scale.domain()[0]); 
     });
   }
 
+  function createHandle(position) {
+    return sliderEl.append("a")
+        .class("d3-slider-handle d3-slider-handle-" + position, true)
+        .attr("xlink:href", "#");
+  }
+
   function onSliderClick() {
-    if (orientation === "horizontal") {
-      moveHandle(scale(event.offsetX / parseInt(sliderEl.style("width"), 10) * 100));
-    } else {
-      moveHandle(scale(event.offsetY / parseInt(sliderEl.style("height"), 10) * 100));
+    var pos = (orientation === "horizontal") ? ["offsetX", "width"] : ["offsetY", "height"],
+        newValue = scale(event[pos[0]] / parseInt(sliderEl.style(pos[1]), 10) * 100);
+
+    console.log(event);
+
+    if (value.length === 2) { // Two handles
+      console.log(event.target, newValue, value, Math.abs(value[0] - newValue), Math.abs(value[1] - newValue));
+    } else { // Single handle
+      moveHandle(newValue);
     }
   }
 
-  function moveHandle(value) {
-    console.log("move", value, stepValue(value));
-    handle.style((orientation === "horizontal") ? "left" : "bottom", scale.invert(value) + "%");
+  function moveHandle(newValue) {
+    var pos = (orientation === "horizontal") ? ["left", "right"] : ["bottom", "top"];
+
+    value = newValue;
+
+    if (value.length === 2) { // Two handles
+      lowerHandle.style(pos[0], scale.invert(value[0]) + "%");
+      upperHandle.style(pos[0], scale.invert(value[1]) + "%");
+      rangeEl.style(pos[0], scale.invert(value[0]) + "%");
+      rangeEl.style(pos[1], (100 - scale.invert(value[1])) + "%");
+    } else { // Single handle
+      lowerHandle.style(pos[0], scale.invert(value) + "%");
+      rangeEl.style(pos[1], (100 - scale.invert(value)) + "%");
+    }
   }
 
   // Calculate nearest step value
@@ -85,12 +113,6 @@ export default function () {
     step = _;
     return slider;
   }   
-
-  slider.animate = function(_) {
-    if (!arguments.length) return animate;
-    animate = _;
-    return slider;
-  } 
 
   return slider;
 };
