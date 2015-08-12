@@ -98,6 +98,7 @@ export default function () {
 /* 
 
 Other sliders: 
+http://api.jqueryui.com/slider/
 http://refreshless.com/nouislider/
 
 */
