@@ -1,7 +1,7 @@
  {
-  "name": "d3.slider-megankanne",
-  "version": "0.1.1",
-  "description": "D3 slider forked from turban/d3.slider",
+  "name": "d3.slider",
+  "version": "0.1.0",
+  "description": "A pure D3.js slider inspired by the jQuery UI Slider",
   "main": [
     "d3.slider.js",
     "d3.slider.css"
@@ -10,8 +10,7 @@
     "d3": "~3.4.8"
   },
   "authors": [
-    "turban",
-    "megankanne"
+    "turban"
   ],
   "license": "BSD",
   "ignore": []
