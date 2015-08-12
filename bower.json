@@ -1,0 +1,17 @@
+ {
+  "name": "d3.slider",
+  "version": "0.1.0",
+  "description": "A pure D3.js slider inspired by the jQuery UI Slider",
+  "main": [
+    "d3.slider.js",
+    "d3.slider.css"
+  ],
+  "dependencies": {
+    "d3": "~3.4.8"
+  },
+  "authors": [
+    "turban"
+  ],
+  "license": "BSD",
+  "ignore": []
+}
