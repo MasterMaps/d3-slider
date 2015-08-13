@@ -1,4 +1,5 @@
 import {select} from "d3-selection";  // https://github.com/d3/d3-selection
+import {mouse} from "d3-selection";
 //import {linear} from "d3-scale";    // https://github.com/d3/d3-scale
 
 export default function () {
@@ -50,13 +51,15 @@ export default function () {
   }
 
   function onSliderClick() {
-    var pos = (orientation === "horizontal") ? ["offsetX", "width"] : ["offsetY", "height"],
-        newValue = scale(event[pos[0]] / parseInt(sliderEl.style(pos[1]), 10) * 100);
-
-    console.log(event);
+    var pos = mouse(sliderEl._root[0])[(orientation === "horizontal") ? 0 : 1], // TODO: Find cleaner wau to get dom element
+        newValue = scale(pos / parseInt(sliderEl.style((orientation === "horizontal") ? "width" : "height"), 10) * 100);
 
     if (value.length === 2) { // Two handles
-      console.log(event.target, newValue, value, Math.abs(value[0] - newValue), Math.abs(value[1] - newValue));
+      if (Math.abs(value[0] - newValue) > Math.abs(value[1] - newValue)) {
+        moveHandle([value[0], newValue]);
+      } else {
+        moveHandle([newValue, value[1]]);
+      }
     } else { // Single handle
       moveHandle(newValue);
     }
