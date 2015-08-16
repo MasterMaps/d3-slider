@@ -1,58 +1,103 @@
-import {select} from "d3-selection";  // https://github.com/d3/d3-selection
-import {mouse} from "d3-selection";
-//import {linear} from "d3-scale";    // https://github.com/d3/d3-scale
-
-export default function () {
+d3.slider = function module() {
+  "use strict";
 
   // Public variables width default settings
-  var range = [0, 100],
+  var domain = [0, 100],
       step = 1,
-      orientation = "horizontal",
+      orientation = "horizontal",      
       value,
-      scale;      
+      scale, 
+      axis;     
 
   // Private variables
   var sliderEl,
       rangeEl,
       lowerHandle,
-      upperHandle;
+      upperHandle,
+      axisScale,
+      dispatch = d3.dispatch("slide");
+
+  var drag = d3.behavior.drag().on("drag", onDrag);
 
   function slider(selection) {
     selection.each(function() {
 
       // Create scale if not defined by user
       if (!scale) {
-        //scale = linear().domain([min, max]);
+        scale = d3.scale.linear().domain(domain);
       }
-      scale.domain([0, 100]); // Percent
+      scale.range([0, 100]); // Percent
+      scale.clamp(true);
 
       // Create slider div
-      sliderEl = select(this).class("d3-slider d3-slider-" + orientation, true)
-          .event("click", onSliderClick);
+      sliderEl = d3.select(this).classed("d3-slider d3-slider-" + orientation, true)
+          .on("click", onClick);
 
       rangeEl = sliderEl.append("div")
-          .class("d3-slider-range", true);
+          .classed("d3-slider-range", true);
 
       // Create slider handle
-      lowerHandle = createHandle("lower");
+      lowerHandle = drawHandle("lower");
 
       if (value && value.length === 2) { // Two handles
-        upperHandle = createHandle("upper");
+        upperHandle = drawHandle("upper");
       }
 
-      moveHandle(value || scale.domain()[0]); 
+      moveHandle(value || scale.range()[0]); 
+
+      if (axis) {
+        drawAxis();
+      }
+
     });
   }
 
-  function createHandle(position) {
-    return sliderEl.append("a")
-        .class("d3-slider-handle d3-slider-handle-" + position, true)
-        .attr("xlink:href", "#");
+  function drawHandle(position) {
+    return sliderEl.append("div")
+        .classed("d3-slider-handle d3-slider-handle-" + position, true)
+        .attr("xlink:href", "#")
+        .on("click", stopPropagation)
+        .call(drag)
   }
 
-  function onSliderClick() {
-    var pos = mouse(sliderEl._root[0])[(orientation === "horizontal") ? 0 : 1], // TODO: Find cleaner wau to get dom element
-        newValue = scale(pos / parseInt(sliderEl.style((orientation === "horizontal") ? "width" : "height"), 10) * 100);
+  function drawAxis() {
+
+    // Remove axis before redraw
+    sliderEl.select("svg").remove();
+
+    // Create axis if not defined by user
+    if (typeof axis === "boolean") {
+      axis = d3.svg.axis()
+          .ticks(Math.round(getSliderLength() / 100))
+          //.tickFormat(tickFormat)
+          .orient((orientation === "horizontal") ? "bottom" : "right"); 
+      } 
+
+      // Copy slider scale to move from percentages to pixels
+      axisScale = scale.copy().range([0, getSliderLength() - 1]);
+      axis.scale(axisScale);
+
+      // Create SVG axis container
+      var svg = sliderEl.append("svg")
+        .classed("d3-slider-axis d3-slider-axis-" + axis.orient(), true)
+        .on("click", stopPropagation);
+
+      var g = svg.append("g");
+
+      // Horizontal axis
+      if (orientation === "horizontal") {
+        //svg.style("left", -margin);
+        svg.attr({ 
+           width: getSliderLength()
+        });  
+      }
+
+      g.call(axis);  
+  }
+
+  function onClick() {
+    var pos = d3.mouse(sliderEl[0][0])[(orientation === "horizontal") ? 0 : 1], // TODO: Find cleaner wau to get dom element
+        newValue = stepValue(scale.invert(pos / getSliderLength() * 100));
 
     if (value.length === 2) { // Two handles
       if (Math.abs(value[0] - newValue) > Math.abs(value[1] - newValue)) {
@@ -65,25 +110,44 @@ export default function () {
     }
   }
 
+  function onDrag() {
+    var pos = d3.event[(orientation === "horizontal") ? "x" : "y"],
+        newValue = stepValue(scale.invert(pos / getSliderLength() * 100)),
+        lowerHandle = d3.select(this).classed("d3-slider-handle-lower")
+
+    if (value.length === 2) { // Two handles
+      console.log(lowerHandle, newValue, value);
+      if (lowerHandle && newValue <= value[1]) {
+        moveHandle([newValue, value[1]]);
+      } else if (!lowerHandle && newValue >= value[0]) {
+        moveHandle([value[0], newValue]); 
+      }
+    } else if (newValue !== value) {
+      moveHandle(newValue);
+      dispatch.slide(d3.event.sourceEvent, newValue);
+    }
+  }
+
+  // Move slider handle if value is different
   function moveHandle(newValue) {
     var pos = (orientation === "horizontal") ? ["left", "right"] : ["bottom", "top"];
 
-    value = newValue;
-
-    if (value.length === 2) { // Two handles
-      lowerHandle.style(pos[0], scale.invert(value[0]) + "%");
-      upperHandle.style(pos[0], scale.invert(value[1]) + "%");
-      rangeEl.style(pos[0], scale.invert(value[0]) + "%");
-      rangeEl.style(pos[1], (100 - scale.invert(value[1])) + "%");
-    } else { // Single handle
-      lowerHandle.style(pos[0], scale.invert(value) + "%");
-      rangeEl.style(pos[1], (100 - scale.invert(value)) + "%");
+    if (newValue.length === 2) { // Two handles
+      lowerHandle.style(pos[0], scale(newValue[0]) + "%");
+      upperHandle.style(pos[0], scale(newValue[1]) + "%");
+      rangeEl.style(pos[0], scale(newValue[0]) + "%");
+      rangeEl.style(pos[1], (100 - scale(newValue[1])) + "%");
+    } else  { // Single handle
+      lowerHandle.style(pos[0], scale(newValue) + "%");
+      rangeEl.style(pos[1], (100 - scale(newValue)) + "%");
     }
+
+    value = newValue;
   }
 
   // Calculate nearest step value
   function stepValue(value) {
-    var valueModStep = (value - scale.range()[0]) % step,
+    var valueModStep = (value - scale.domain()[0]) % step,
         alignValue = value - valueModStep;
 
     if (Math.abs(valueModStep) * 2 >= step) {
@@ -92,6 +156,26 @@ export default function () {
 
     return alignValue;
   }
+
+  function getSliderLength() {
+    return parseInt(sliderEl.style((orientation === "horizontal") ? "width" : "height"), 10);
+  }
+
+  function stopPropagation() {
+    d3.event.stopPropagation();
+  }
+
+  slider.axis = function(_) {
+    if (!arguments.length) return axis;
+    axis = _;
+    return slider;
+  }   
+
+  slider.domain = function(_) {
+    if (!arguments.length) return domain;
+    domain = _;
+    return slider;
+  }   
 
   slider.scale = function(_) {
     if (!arguments.length) return scale;
@@ -117,8 +201,13 @@ export default function () {
     return slider;
   }   
 
+  d3.rebind(slider, dispatch, "on");
+
+  d3.select(window).on('resize', drawAxis); 
+
   return slider;
-};
+
+}
 
 /* 
 
