@@ -7,7 +7,10 @@ d3.slider = function module() {
       orientation = "horizontal",      
       value,
       scale, 
-      axis;     
+      innerScale,
+      axis,
+      ticks,
+      tickFormat;    
 
   // Private variables
   var sliderEl,
@@ -15,9 +18,13 @@ d3.slider = function module() {
       lowerHandle,
       upperHandle,
       axisScale,
-      dispatch = d3.dispatch("slide");
+      //tickFormat = d3.format(".0"),
+      dispatch = d3.dispatch("drag", "dragstart", "dragend");
 
-  var drag = d3.behavior.drag().on("drag", onDrag);
+  var drag = d3.behavior.drag()
+      .on("drag", onDrag)
+      .on("dragstart", onDragStart)
+      .on("dragend", onDragEnd);
 
   function slider(selection) {
     selection.each(function() {
@@ -27,7 +34,7 @@ d3.slider = function module() {
         scale = d3.scale.linear().domain(domain);
       }
       scale.range([0, 100]); // Percent
-      scale.clamp(true);
+      scale.clamp(true); 
 
       // Create slider div
       sliderEl = d3.select(this).classed("d3-slider d3-slider-" + orientation, true)
@@ -68,10 +75,20 @@ d3.slider = function module() {
     // Create axis if not defined by user
     if (typeof axis === "boolean") {
       axis = d3.svg.axis()
-          .ticks(Math.round(getSliderLength() / 100))
-          //.tickFormat(tickFormat)
+          //.ticks(Math.round(getSliderLength() / 100))
+
           .orient((orientation === "horizontal") ? "bottom" : "right"); 
       } 
+
+      if (ticks) {
+        axis.ticks(ticks);
+      }
+
+      if (tickFormat) {
+        axis.tickFormat(tickFormat);
+      }
+
+      //console.log(axis);
 
       // Copy slider scale to move from percentages to pixels
       axisScale = scale.copy().range([0, getSliderLength() - 1]);
@@ -97,7 +114,7 @@ d3.slider = function module() {
 
   function onClick() {
     var pos = d3.mouse(sliderEl[0][0])[(orientation === "horizontal") ? 0 : 1], // TODO: Find cleaner wau to get dom element
-        newValue = stepValue(scale.invert(pos / getSliderLength() * 100));
+        newValue = clampToInnerScale(stepValue(scale.invert(pos / getSliderLength() * 100)));
 
     if (value.length === 2) { // Two handles
       if (Math.abs(value[0] - newValue) > Math.abs(value[1] - newValue)) {
@@ -107,16 +124,17 @@ d3.slider = function module() {
       }
     } else { // Single handle
       moveHandle(newValue);
+      dispatch.dragend(d3.event.sourceEvent, value);
     }
   }
 
   function onDrag() {
     var pos = d3.event[(orientation === "horizontal") ? "x" : "y"],
-        newValue = stepValue(scale.invert(pos / getSliderLength() * 100)),
+        newValue = clampToInnerScale(stepValue(scale.invert(pos / getSliderLength() * 100))),
         lowerHandle = d3.select(this).classed("d3-slider-handle-lower")
 
     if (value.length === 2) { // Two handles
-      console.log(lowerHandle, newValue, value);
+      //console.log(lowerHandle, newValue, value);
       if (lowerHandle && newValue <= value[1]) {
         moveHandle([newValue, value[1]]);
       } else if (!lowerHandle && newValue >= value[0]) {
@@ -124,25 +142,46 @@ d3.slider = function module() {
       }
     } else if (newValue !== value) {
       moveHandle(newValue);
-      dispatch.slide(d3.event.sourceEvent, newValue);
+      dispatch.drag(d3.event.sourceEvent, newValue);
     }
+  }
+
+  function onDragStart() {
+    dispatch.dragstart(d3.event.sourceEvent, value);
+  }
+
+  function onDragEnd() {
+    dispatch.dragend(d3.event.sourceEvent, value);
+  }
+
+  function clampToInnerScale(value) {
+    if (innerScale) {
+      if (value.length !== 1) {
+       if (innerScale(value) > 1) {
+          return innerScale.invert(1);
+        }
+      }
+    }
+    return value;
   }
 
   // Move slider handle if value is different
   function moveHandle(newValue) {
-    var pos = (orientation === "horizontal") ? ["left", "right"] : ["bottom", "top"];
+    if (lowerHandle) {
+      var pos = (orientation === "horizontal") ? ["left", "right"] : ["bottom", "top"];
 
-    if (newValue.length === 2) { // Two handles
-      lowerHandle.style(pos[0], scale(newValue[0]) + "%");
-      upperHandle.style(pos[0], scale(newValue[1]) + "%");
-      rangeEl.style(pos[0], scale(newValue[0]) + "%");
-      rangeEl.style(pos[1], (100 - scale(newValue[1])) + "%");
-    } else  { // Single handle
-      lowerHandle.style(pos[0], scale(newValue) + "%");
-      rangeEl.style(pos[1], (100 - scale(newValue)) + "%");
+      if (newValue.length === 2) { // Two handles
+        lowerHandle.style(pos[0], scale(newValue[0]) + "%");
+        upperHandle.style(pos[0], scale(newValue[1]) + "%");
+        rangeEl.style(pos[0], scale(newValue[0]) + "%");
+        rangeEl.style(pos[1], (100 - scale(newValue[1])) + "%");
+      } else  { // Single handle
+        lowerHandle.style(pos[0], scale(newValue) + "%");
+        rangeEl.style(pos[1], (100 - scale(newValue)) + "%");
+      }
+
+      value = newValue;
     }
-
-    value = newValue;
   }
 
   // Calculate nearest step value
@@ -183,9 +222,16 @@ d3.slider = function module() {
     return slider;
   };
 
+  slider.innerScale = function(_) {
+    if (!arguments.length) return innerScale;
+    innerScale = _;
+    return slider;
+  };
+
   slider.value = function(_) {
     if (!arguments.length) return value;
     value = _;
+    moveHandle(value);
     return slider;
   };
 
@@ -201,10 +247,25 @@ d3.slider = function module() {
     return slider;
   }   
 
+  slider.ticks = function(_) {
+    if (!arguments.length) return ticks;
+    ticks = _;
+    return slider;
+  }  
+
+  slider.tickFormat = function(_) {
+    if (!arguments.length) return tickFormat;
+    tickFormat = _;
+    return slider;
+  }  
+
+  slider.resize = function() {
+    drawAxis();
+    return slider;
+  }
+
   d3.rebind(slider, dispatch, "on");
-
-  d3.select(window).on('resize', drawAxis); 
-
+  
   return slider;
 
 }
