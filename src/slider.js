@@ -18,7 +18,7 @@ d3.slider = function module() {
       lowerHandle,
       upperHandle,
       axisScale,
-      //tickFormat = d3.format(".0"),
+      tickFormat = d3.format(".0"),
       dispatch = d3.dispatch("drag", "dragstart", "dragend");
 
   var drag = d3.behavior.drag()
@@ -75,8 +75,6 @@ d3.slider = function module() {
     // Create axis if not defined by user
     if (typeof axis === "boolean") {
       axis = d3.svg.axis()
-          //.ticks(Math.round(getSliderLength() / 100))
-
           .orient((orientation === "horizontal") ? "bottom" : "right"); 
       } 
 

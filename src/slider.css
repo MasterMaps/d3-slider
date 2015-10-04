@@ -1,0 +1,131 @@
+.d3-slider {
+  position: relative;
+  box-sizing: border-box;
+  border: 1px solid #555;
+}
+
+.d3-slider-range {
+  position: absolute;
+  background: #FFAC00;  
+}
+
+.d3-slider-handle {
+  position: absolute;
+  height: 1.4em;
+  width: 1.4em;
+  border: 1px solid #d3d3d3;
+  background: #eee;
+  background: linear-gradient(to bottom, #eee 0%, #ddd 100%);
+  z-index: 101;  
+}
+
+.d3-slider-handle:hover {
+  border: 1px solid #999;
+}
+
+.d3-slider-handle:before,
+.d3-slider-handle:after {
+  content: "";
+  display: block;
+  position: absolute;
+  background: #999;   
+}
+
+.d3-slider-axis {
+  position: absolute;
+  z-index: 100;
+  overflow: visible; 
+  height: 100%;
+  left: -1px;
+}
+
+.d3-slider-axis-bottom {
+  top: 100%;
+}
+
+.d3-slider-axis-top {
+  top: 0;
+}
+
+.d3-slider-axis path {
+  stroke-width: 0;
+  fill: none;
+}
+
+.d3-slider-axis line {
+  fill: none;
+  stroke: #aaa;
+  shape-rendering: crispEdges;
+}
+
+.d3-slider-axis text {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;  
+  user-select: none;
+  font-size: 0.7em;
+  fill: #555;
+}
+
+/* horizontal sliders */
+
+.d3-slider-horizontal {
+  height: .8em;
+  margin: 2em 0;
+}
+
+.d3-slider-horizontal .d3-slider-range {
+  left: 0;
+  right: 0;
+  height: 100%;
+}
+
+.d3-slider-horizontal .d3-slider-handle {
+  top: -.4em;
+  margin-left: -.8em;   
+  cursor: ew-resize;
+}
+
+.d3-slider-horizontal .d3-slider-handle:before,
+.d3-slider-horizontal .d3-slider-handle:after {
+  height: 60%;
+  width: 1px;
+  left: 40%;
+  top: 20%; 
+}
+
+.d3-slider-horizontal .d3-slider-handle:after {
+  left: 60%;
+}
+
+/* vertical sliders */ 
+
+.d3-slider-vertical {
+  width: .8em;
+  margin: 2em;
+}
+
+.d3-slider-vertical .d3-slider-range {
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.d3-slider-vertical .d3-slider-handle {
+  left: -.4em;
+  margin-bottom: -.8em; 
+  cursor: ns-resize;
+}
+
+.d3-slider-vertical .d3-slider-handle:before,
+.d3-slider-vertical .d3-slider-handle:after {
+  height: 1px;
+  width: 60%;
+  left: 20%;
+  top: 40%; 
+}
+
+.d3-slider-vertical .d3-slider-handle:after {
+  top: 60%;
+}
