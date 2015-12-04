@@ -50,11 +50,7 @@ return function module() {
 
   function slider(selection) {
     selection.each(function() {
-
-      // Create scale if not defined by user
-      if (!scale) {
-        scale = d3.scale.linear().domain([min, max]);
-      }
+      scale = d3.scale.linear().domain([min, max]);
 
       // Start value
       value = value || scale.domain()[0];
@@ -85,12 +81,15 @@ return function module() {
           .on("click", stopPropagation)
           .call(drag);
       } else {
-        handle1 = div.append("a")
-          .classed("d3-slider-handle", true)
-          .attr("xlink:href", "#")
-          .attr('id', "handle-one")
-          .on("click", stopPropagation)
-          .call(drag);
+        handle1 = div.select(".d3-slider-handle")
+        if(handle1.empty()) {
+          handle1 = div.append("a")
+            .classed("d3-slider-handle", true)
+            .attr("xlink:href", "#")
+            .attr('id', "handle-one")
+            .on("click", stopPropagation)
+            .call(drag);
+        }
       }
       
       // Horizontal slider
@@ -161,14 +160,22 @@ return function module() {
 
         // Copy slider scale to move from percentages to pixels
         axisScale = scale.ticks ? scale.copy().range([0, sliderLength]) : scale.copy().rangePoints([0, sliderLength], 0.5);
-          axis.scale(axisScale);
+        axis.scale(axisScale);
 
+        var newAxis = false;
+        var svg = dom.select("svg.d3-slider-axis");
+        if(svg.empty()) {
           // Create SVG axis container
-        var svg = dom.append("svg")
+          newAxis = true;
+          svg = dom.append("svg")
             .classed("d3-slider-axis d3-slider-axis-" + axis.orient(), true)
             .on("click", stopPropagation);
+        }
 
-        var g = svg.append("g");
+        var g = svg.select("g");
+        if(g.empty()) {
+          g = svg.append("g");
+        }
 
         // Horizontal axis
         if (orientation === "horizontal") {
@@ -205,8 +212,12 @@ return function module() {
 
         }
 
-        g.call(axis);
-
+        if(newAxis) {
+          g.call(axis);
+        }
+        else {
+          g.transition().duration(500).call(axis);
+        }
       }
 
       function onClickHorizontal() {
