@@ -400,7 +400,7 @@ return function module() {
 
   slider.value = function(_) {
     if (!arguments.length) return value;
-    if (value) {
+    if (typeof value !== "undefined") {
       moveHandle(stepValue(_));
     };
     value = _;
