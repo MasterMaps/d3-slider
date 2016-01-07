@@ -1,0 +1,26 @@
+{
+  "name": "d3-slider",
+  "version": "0.1.0",
+  "homepage": "https://github.com/MasterMaps/d3-slider",
+  "authors": [
+    "Bjørn Sandvik <bjorn@mastermaps.com>"
+  ],
+  "description": "d3.js slider",
+  "main": [
+    "d3.slider.css",
+    "d3.slider.js"
+  ],
+  "moduleType": [
+    "amd",
+    "globals"
+  ],
+  "keywords": [
+    "d3",
+    "visualization"
+  ],
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "index.html"
+  ]
+}
