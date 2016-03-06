@@ -212,18 +212,20 @@ return function module() {
       function onClickHorizontal() {
         if (toType(value) != "array") {
           var pos = Math.max(0, Math.min(sliderLength, d3.event.offsetX || d3.event.layerX));
-          moveHandle(scale.invert ? 
-                      stepValue(scale.invert(pos / sliderLength))
-                    : nearestTick(pos / sliderLength));
+          var v = scale.invert ? stepValue(scale.invert(pos / sliderLength))
+                               : nearestTick(pos / sliderLength);
+          moveHandle(v);
+          dispatch.slideend(d3.event, v);
         }
       }
 
       function onClickVertical() {
         if (toType(value) != "array") {
           var pos = sliderLength - Math.max(0, Math.min(sliderLength, d3.event.offsetY || d3.event.layerY));
-          moveHandle(scale.invert ? 
-                      stepValue(scale.invert(pos / sliderLength))
-                    : nearestTick(pos / sliderLength));
+          var v = scale.invert ? stepValue(scale.invert(pos / sliderLength))
+                               : nearestTick(pos / sliderLength);
+          moveHandle(v);
+          dispatch.slideend(d3.event, v);
         }
       }
 
