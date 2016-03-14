@@ -117,8 +117,10 @@ d3.slider = function module() {
     if (value.length === 2) { // Two handles
       if (Math.abs(value[0] - newValue) > Math.abs(value[1] - newValue)) {
         moveHandle([value[0], newValue]);
+        dispatch.drag(d3.event.sourceEvent, [value[0], newValue]);
       } else {
         moveHandle([newValue, value[1]]);
+        dispatch.drag(d3.event.sourceEvent, [newValue, value[1]]);
       }
     } else { // Single handle
       moveHandle(newValue);
@@ -135,8 +137,10 @@ d3.slider = function module() {
       //console.log(lowerHandle, newValue, value);
       if (lowerHandle && newValue <= value[1]) {
         moveHandle([newValue, value[1]]);
+        dispatch.drag(d3.event.sourceEvent, [newValue, value[1]]);
       } else if (!lowerHandle && newValue >= value[0]) {
         moveHandle([value[0], newValue]); 
+        dispatch.drag(d3.event.sourceEvent, [value[0], newValue]);
       }
     } else if (newValue !== value) {
       moveHandle(newValue);
