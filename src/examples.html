@@ -73,6 +73,12 @@
     <code>d3.slider().value(50).orientation("vertical")</code>
     <div id="slider7"></div>
 
+    <h2>Slider range with slide event: <span id="slider8text">0</span></h2>
+    <code>d3.slider().domain([10,90]).on("drag", function(evt, value) {<br>
+    &nbsp;&nbsp;d3.select('#slider8text').text(value);<br>
+    })</code>
+    <div id="slider8"></div>
+
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
@@ -94,6 +100,12 @@
     d3.select('#slider6').call(d3.slider().axis(true).domain([2000, 2100]).step(5));
 
     d3.select('#slider7').call(d3.slider().orientation("vertical"));
+
+    d3.select('#slider8').call(
+            d3.slider().value([10,90])
+                    .on("drag", function(evt, value) {
+                      d3.select('#slider8text').text(value);
+    }));
 
   </script>
  
