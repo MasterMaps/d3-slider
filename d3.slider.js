@@ -42,7 +42,7 @@ return function module() {
   var axisScale,
       dispatch = d3.dispatch("slide", "slideend"),
       formatPercent = d3.format(".2%"),
-      tickFormat = d3.format(".0"),
+      tickFormat = d3.format(".0f"),
       handle1,
       handle2 = null,
       divRange,
@@ -50,11 +50,7 @@ return function module() {
 
   function slider(selection) {
     selection.each(function() {
-
-      // Create scale if not defined by user
-      if (!scale) {
-        scale = d3.scale.linear().domain([min, max]);
-      }
+      scale = d3.scaleLinear().domain([min, max]);
 
       // Start value
       value = value || scale.domain()[0];
@@ -62,9 +58,9 @@ return function module() {
       // DIV container
       var div = d3.select(this).classed("d3-slider d3-slider-" + orientation, true);
       
-      var drag = d3.behavior.drag();
-      drag.on('dragend', function () {
-        dispatch.slideend(d3.event, value);
+      var drag = d3.drag();
+      drag.on('end', function () {
+        dispatch.call("slideend", this, d3.event, value);
       })
 
       // Slider handle
@@ -85,14 +81,17 @@ return function module() {
           .on("click", stopPropagation)
           .call(drag);
       } else {
-        handle1 = div.append("a")
-          .classed("d3-slider-handle", true)
-          .attr("xlink:href", "#")
-          .attr('id', "handle-one")
-          .on("click", stopPropagation)
-          .call(drag);
+        handle1 = div.select(".d3-slider-handle");
+        if(handle1.empty()) {
+          handle1 = div.append("a")
+            .classed("d3-slider-handle", true)
+            .attr("xlink:href", "#")
+            .attr('id', "handle-one")
+            .on("click", stopPropagation)
+            .call(drag);
+        }
       }
-      
+
       // Horizontal slider
       if (orientation === "horizontal") {
 
@@ -148,65 +147,63 @@ return function module() {
 
 
       function createAxis(dom) {
+        // Copy slider scale to move from percentages to pixels
+        axisScale = scale.copy().range([0, sliderLength]);
 
         // Create axis if not defined by user
         if (typeof axis === "boolean") {
+          if (orientation === "horizontal")
+            axis = d3.axisBottom();
+          else
+            axis = d3.axisRight();
+          axis
+            .ticks(Math.round(sliderLength / 100))
+            .tickFormat(tickFormat);
+        }
+        axis.scale(axisScale);
 
-          axis = d3.svg.axis()
-              .ticks(Math.round(sliderLength / 100))
-              .tickFormat(tickFormat)
-              .orient((orientation === "horizontal") ? "bottom" :  "right");
-
+        var newAxis = false;
+        var svg = dom.select("svg.d3-slider-axis");
+        if(svg.empty()) {
+          // Create SVG axis container
+          newAxis = true;
+          svg = dom.append("svg")
+            .classed("d3-slider-axis d3-slider-axis-" + (orientation === "horizontal" ? "bottom" : "right"), true)
+            .on("click", stopPropagation);
         }
 
-        // Copy slider scale to move from percentages to pixels
-        axisScale = scale.ticks ? scale.copy().range([0, sliderLength]) : scale.copy().rangePoints([0, sliderLength], 0.5);
-          axis.scale(axisScale);
-
-          // Create SVG axis container
-        var svg = dom.append("svg")
-            .classed("d3-slider-axis d3-slider-axis-" + axis.orient(), true)
-            .on("click", stopPropagation);
-
-        var g = svg.append("g");
+        var g = svg.select("g");
+        if(g.empty()) {
+          g = svg.append("g");
+        }
 
         // Horizontal axis
         if (orientation === "horizontal") {
 
           svg.style("margin-left", -margin + "px");
 
-          svg.attr({
-            width: sliderLength + margin * 2,
-            height: margin
-          });
+          svg.style("width", (sliderLength + margin * 2) + "px");
+          svg.style("height", margin + "px");
 
-          if (axis.orient() === "top") {
-            svg.style("top", -margin + "px");
-            g.attr("transform", "translate(" + margin + "," + margin + ")");
-          } else { // bottom
-            g.attr("transform", "translate(" + margin + ",0)");
-          }
+          g.attr("transform", "translate(" + margin + ",0)");
 
         } else { // Vertical
 
           svg.style("top", -margin + "px");
 
-          svg.attr({
-            width: margin,
-            height: sliderLength + margin * 2
-          });
+          svg.style("width", (sliderLength + margin * 2) + "px");
+          svg.style("height", margin + "px");
 
-          if (axis.orient() === "left") {
-            svg.style("left", -margin + "px");
-            g.attr("transform", "translate(" + margin + "," + margin + ")");
-          } else { // right          
-            g.attr("transform", "translate(" + 0 + "," + margin + ")");
-          }
+          g.attr("transform", "translate(" + 0 + "," + margin + ")");
 
         }
 
-        g.call(axis);
-
+        if(newAxis) {
+          g.call(axis);
+        }
+        else {
+          g.transition().duration(500).call(axis);
+        }
       }
 
       function onClickHorizontal() {
@@ -270,11 +267,11 @@ return function module() {
       if (toType(value) == "array" && value.length == 2) {
         value[ active - 1 ] = newValue;
         if (d3.event) {
-          dispatch.slide(d3.event, value );
+          dispatch.call("slide", this, d3.event, value);
         };
       } else {
         if (d3.event) {
-          dispatch.slide(d3.event.sourceEvent || d3.event, value = newValue);
+          dispatch.call("slide", this, d3.event.sourceEvent || d3.event, value = newValue);
         };
       }
 
@@ -400,7 +397,7 @@ return function module() {
 
   slider.value = function(_) {
     if (!arguments.length) return value;
-    if (value) {
+    if (typeof value !== "undefined") {
       moveHandle(stepValue(_));
     };
     value = _;
@@ -419,7 +416,10 @@ return function module() {
     return slider;
   };
 
-  d3.rebind(slider, dispatch, "on");
+  slider.on = function() {
+    dispatch.on.apply(dispatch, arguments);
+    return this;
+  };
 
   return slider;
 
