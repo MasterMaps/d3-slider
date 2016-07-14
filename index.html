@@ -98,7 +98,7 @@
 
   </div>
 
-  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="d3.slider.js"></script>
   <script>
 
@@ -117,7 +117,7 @@
 
     d3.select('#slider5').call(d3.slider().axis(true));
 
-    var axis = d3.svg.axis().orient("top").ticks(4);
+    var axis = d3.axisTop().ticks(4);
     d3.select('#slider6').call(d3.slider().axis(axis));
 
     d3.select('#slider7').call(d3.slider().axis(true).min(2000).max(2100).step(5));
@@ -126,11 +126,11 @@
 
     d3.select('#slider9').call(d3.slider().value( [10, 30] ).orientation("vertical"));
 
-    d3.select('#slider10').call(d3.slider().scale(d3.time.scale().domain([new Date(1984,1,1), new Date(2014,1,1)])).axis(d3.svg.axis()));
+    d3.select('#slider10').call(d3.slider().scale(d3.scaleTime().domain([new Date(1984,1,1), new Date(2014,1,1)])).axis(d3.axisBottom()));
 
-    d3.select('#slider11').call(d3.slider().scale(d3.time.scale().domain([new Date(1984,1,1), new Date(2014,1,1)])).axis(d3.svg.axis()).snap(true).value(new Date(2000,1,1)));
+    d3.select('#slider11').call(d3.slider().scale(d3.scaleTime().domain([new Date(1984,1,1), new Date(2014,1,1)])).axis(d3.axisBottom()).snap(true).value(new Date(2000,1,1)));
 
-    essai = d3.slider().scale(d3.scale.ordinal().domain(["Gecko", "Webkit", "Blink", "Trident"]).rangePoints([0, 1], 0.5)).axis(d3.svg.axis()).snap(true).value("Gecko");
+    essai = d3.slider().scale(d3.scaleOrdinal().domain(["Gecko", "Webkit", "Blink", "Trident"]).range([0, 1])).axis(d3.axisBottom()).snap(true).value("Gecko");
     d3.select('#slider12').call(essai);
 
   </script>
