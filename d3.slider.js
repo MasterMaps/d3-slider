@@ -116,6 +116,10 @@ return function module() {
         }
         
         sliderLength = parseInt(div.style("width"), 10);
+        
+         d3.select(window).on('resize', function() {
+          sliderLength = parseInt(div.style("width"), 10);
+        });
 
       } else { // Vertical
 
@@ -139,6 +143,10 @@ return function module() {
         }
         
         sliderLength = parseInt(div.style("height"), 10);
+        
+         d3.select(window).on('resize', function() {
+          sliderLength = parseInt(div.style("height"), 10);
+        });
 
       }
       
