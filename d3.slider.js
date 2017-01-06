@@ -40,7 +40,7 @@ return function module() {
 
   // Private variables
   var axisScale,
-      dispatch = d3.dispatch("slide", "slideend"),
+      dispatch = d3.dispatch("slide", "slidestart", "slideend"),
       formatPercent = d3.format(".2%"),
       tickFormat = d3.format(".0"),
       handle1,
@@ -65,6 +65,10 @@ return function module() {
       var drag = d3.behavior.drag();
       drag.on('dragend', function () {
         dispatch.slideend(d3.event, value);
+      })
+
+      drag.on('dragstart', function () {
+        dispatch.slidestart(d3.event, value);
       })
 
       // Slider handle
