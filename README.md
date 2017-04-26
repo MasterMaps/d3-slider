@@ -1,6 +1,18 @@
-D3.js Slider
-============
+# d3-slider
 
-This is a pure D3.js slider inspired by the <a href="">jQuery UI Slider</a>. Supports <a href="https://github.com/mbostock/d3/wiki/SVG-Axes">D3’s axis component</a>. Feel free to contribute!
+Slider for D3.js 4.0.
 
-<a href="http://thematicmapping.org/playground/d3/d3.slider/">Examples</a>
+## API Reference
+
+<a name="slider" href="#slider">#</a> <b>slider</b>(<i>selection</i>)
+
+Creates a new slider.
+
+<a name="slider_value" href="#slider_value">#</a> *slider*.<b>value</b>(<i>value</i>)
+
+If <i>value</i> is specified, sets the slider's handle position. If <i>value</i> is not specified, returns the current handle position.
+
+<a name="slider_step" href="#slider_step">#</a> *slider*.<b>step</b>(<i>value</i>)
+
+If <i>value</i> is specified, sets the slider's step interval. Defaults to 1. If <i>value</i> is not specified, returns the current step interval.
+
